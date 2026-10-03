@@ -1,0 +1,17 @@
+{
+  "name": "口袋小號",
+  "short_name": "口袋小號",
+  "description": "用手機或 iPad 吹奏的小號：三個活塞可自由擺位，可輸出左右聲道、只有左或只有右。",
+  "lang": "zh-Hant",
+  "start_url": "./",
+  "scope": "./",
+  "display": "fullscreen",
+  "orientation": "any",
+  "background_color": "#1d0c12",
+  "theme_color": "#1d0c12",
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "icons/icon.svg", "sizes": "any", "type": "image/svg+xml" }
+  ]
+}

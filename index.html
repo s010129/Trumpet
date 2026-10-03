@@ -1,0 +1,1119 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="口袋小號">
+<meta name="theme-color" content="#1d0c12">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icons/icon-180.png">
+<link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+<!-- page:start -->
+<title>口袋小號</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:opsz,wght@6..96,500;6..96,700&family=Noto+Sans+TC:wght@400;500;700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@700&text=%E5%8F%A3%E8%A2%8B%E5%B0%8F%E8%99%9F&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Music&text=%E2%99%AD%E2%99%AF&display=swap">
+<style>
+/* Layout: full-bleed instrument. A slim readout bar sits over a velvet "case lining" stage;
+   the partial strip and the three pearl valves float on it at positions the player sets. */
+:root{
+  color-scheme: dark;
+  --velvet:#1d0c12;          /* case lining */
+  --velvet-2:#33131e;
+  --panel:#26111a;
+  --brass:#d6a24a;
+  --brass-hi:#f6dc96;
+  --brass-lo:#7a4f17;
+  --pearl:#f2ece2;
+  --ink:#f4e9da;
+  --ink-dim:#b79c8e;
+  --ink-on-brass:#2b1306;
+  --line:rgba(246,220,150,.16);
+  --line-strong:rgba(246,220,150,.42);
+  --warn:#ffb39a;
+  --f-display:'Bodoni Moda','Bodoni 72','Noto Music',Didot,'Noto Serif TC',serif;
+  --f-title:'Noto Serif TC','Songti TC','PMingLiU',serif;
+  --f-ui:'Noto Sans TC',-apple-system,BlinkMacSystemFont,'PingFang TC','Microsoft JhengHei',sans-serif;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+[hidden]{display:none!important}
+html{height:100%;box-sizing:border-box;background:var(--velvet)}
+*,*::before,*::after{box-sizing:inherit}
+body{
+  height:100%;margin:0;overflow:hidden;color:var(--ink);font:14px/1.5 var(--f-ui);
+  background:
+    radial-gradient(130% 90% at 50% -10%, var(--velvet-2) 0%, var(--velvet) 62%),
+    var(--velvet);
+  -webkit-user-select:none;user-select:none;-webkit-touch-callout:none;
+  -webkit-tap-highlight-color:transparent;overscroll-behavior:none;
+}
+body::before{ /* velvet pile */
+  content:"";position:fixed;inset:0;pointer-events:none;opacity:.07;mix-blend-mode:screen;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 .85 0 0 0 0 .8 0 0 0 .9 0'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+button{font:inherit;color:inherit}
+button:focus-visible,.seg input:focus-visible+label,input[type=range]:focus-visible{outline:2px solid var(--brass-hi);outline-offset:2px}
+
+#app{
+  position:relative;height:100%;display:flex;flex-direction:column;
+  padding-left:env(safe-area-inset-left,0px);padding-right:env(safe-area-inset-right,0px);
+}
+
+/* ---------- readout bar ---------- */
+.bar{
+  position:relative;display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:12px;
+  min-height:68px;padding:6px 16px;border-bottom:1px solid var(--line);
+}
+.brand{justify-self:start;display:flex;align-items:center;gap:10px;min-width:0}
+.brand-name{font:700 18px/1 var(--f-title);letter-spacing:.08em;white-space:nowrap}
+.key{
+  font:700 13px/1 var(--f-display);color:var(--brass-hi);border:1px solid var(--line-strong);
+  border-radius:999px;padding:4px 9px 3px;letter-spacing:.02em;white-space:nowrap;
+}
+.readout{text-align:center;min-width:7.5em}
+.readout .note{
+  font:500 40px/1 var(--f-display);color:var(--ink-dim);letter-spacing:.01em;
+  transition:color .08s,text-shadow .12s;
+}
+.readout .note small{font-size:.46em;margin-left:.06em;opacity:.8}
+.readout.live .note{color:var(--brass-hi);text-shadow:0 0 18px rgba(246,220,150,.45)}
+.readout .concert{font-size:11px;color:var(--ink-dim);letter-spacing:.04em;font-variant-numeric:tabular-nums;white-space:nowrap}
+.actions{justify-self:end;display:flex;gap:6px}
+.tool{
+  display:flex;flex-direction:column;align-items:center;gap:1px;min-width:50px;padding:6px 8px 4px;
+  background:transparent;border:1px solid var(--line);border-radius:12px;cursor:pointer;
+  font-size:11px;letter-spacing:.06em;color:var(--ink);touch-action:manipulation;
+}
+.tool svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+.tool:active,.tool[aria-pressed="true"]{background:rgba(214,162,74,.16);border-color:var(--line-strong);color:var(--brass-hi)}
+.meter{position:absolute;left:16px;right:16px;bottom:-2px;height:3px;border-radius:2px;background:rgba(246,220,150,.10);overflow:visible}
+.meter i{position:absolute;left:0;top:0;bottom:0;width:0;border-radius:inherit;background:linear-gradient(90deg,var(--brass-lo),var(--brass-hi))}
+.meter b{position:absolute;top:-3px;bottom:-3px;width:2px;margin-left:-1px;background:var(--ink);border-radius:1px;left:50%}
+
+/* ---------- stage ---------- */
+.stage{position:relative;flex:1;min-height:0;overflow:hidden;touch-action:none}
+.strip{
+  position:absolute;display:flex;flex-direction:column-reverse;gap:5px;padding:6px;border-radius:20px;
+  background:linear-gradient(160deg,rgba(246,220,150,.07),rgba(0,0,0,.18));
+  border:1px solid var(--line);touch-action:none;cursor:pointer;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.05),0 14px 34px rgba(0,0,0,.35);
+}
+.strip.horizontal{flex-direction:row}
+.zone{
+  position:relative;flex:1;min-width:0;min-height:0;display:flex;align-items:center;justify-content:center;
+  border-radius:14px;border:1px solid rgba(246,220,150,.08);background:rgba(246,220,150,.035);
+  color:var(--ink-dim);pointer-events:none;container-type:size;
+  transition:background .07s,color .07s,box-shadow .1s,border-color .07s;
+}
+.zone .pn{position:absolute;top:5px;left:8px;font:500 10px/1 var(--f-ui);letter-spacing:.05em;opacity:.55}
+.zone .zn{font:500 20px/1 var(--f-display);font-size:clamp(14px,40cqmin,34px)}
+.zone .zn small{font-size:.5em;margin-left:.05em;opacity:.75}
+.zone.sel{background:rgba(214,162,74,.15);border-color:rgba(214,162,74,.55);color:var(--brass-hi)}
+.zone.on{
+  background:linear-gradient(180deg,var(--brass-hi),var(--brass));color:var(--ink-on-brass);
+  border-color:var(--brass-hi);box-shadow:0 0 26px rgba(246,220,150,.38);
+}
+.zone.on .pn{opacity:.7}
+
+.valve{position:absolute;padding:0;border:0;background:none;border-radius:50%;touch-action:none;cursor:pointer;--vs:90px}
+.valve .ring{
+  display:block;width:100%;height:100%;border-radius:50%;padding:9%;
+  background:conic-gradient(from 200deg,var(--brass-lo),var(--brass-hi) 14%,var(--brass) 30%,var(--brass-lo) 48%,var(--brass-hi) 66%,var(--brass) 82%,var(--brass-lo));
+  box-shadow:0 14px 26px rgba(0,0,0,.5),inset 0 0 0 1px rgba(255,255,255,.18),inset 0 -3px 6px rgba(0,0,0,.35);
+  transition:transform .05s ease-out,box-shadow .08s;
+}
+.valve .pearl{
+  position:relative;display:flex;align-items:center;justify-content:center;width:100%;height:100%;border-radius:50%;overflow:hidden;
+  background:radial-gradient(circle at 34% 28%,#fffdf8 0%,var(--pearl) 34%,#d8cdbd 72%,#b2a491 100%);
+  box-shadow:inset 0 -7px 14px rgba(60,30,10,.22),inset 0 5px 9px rgba(255,255,255,.75);
+}
+.valve .pearl::after{
+  content:"";position:absolute;inset:0;border-radius:50%;mix-blend-mode:soft-light;
+  background:conic-gradient(from 40deg,rgba(255,170,200,.35),rgba(160,215,255,.35),rgba(190,255,210,.3),rgba(255,230,160,.3),rgba(255,170,200,.35));
+}
+.valve .num{position:relative;z-index:1;font:700 calc(var(--vs) * .3)/1 var(--f-display);color:#6d5646;text-shadow:0 1px 0 rgba(255,255,255,.7)}
+.valve.down .ring{
+  transform:scale(.92);
+  box-shadow:0 4px 10px rgba(0,0,0,.55),0 0 0 3px rgba(246,220,150,.4),0 0 30px rgba(246,220,150,.4),inset 0 0 0 1px rgba(255,255,255,.18);
+}
+.valve.down .pearl{background:radial-gradient(circle at 40% 36%,#f6efe3 0%,#e1d5c3 45%,#bfb09b 100%)}
+
+.resize{
+  position:absolute;right:-6px;bottom:-6px;width:34px;height:34px;border-radius:50%;
+  background:var(--brass);border:2px solid var(--velvet);display:none;touch-action:none;cursor:nwse-resize;
+}
+.resize::before{content:"";position:absolute;inset:9px;border-right:2px solid var(--ink-on-brass);border-bottom:2px solid var(--ink-on-brass)}
+.stage.editing .resize{display:block}
+.stage.editing .strip,.stage.editing .valve{outline:2px dashed var(--line-strong);outline-offset:6px;cursor:grab}
+.stage.editing .strip{outline-offset:4px}
+.stage.editing .dragging{outline-color:var(--brass-hi);cursor:grabbing;z-index:5}
+
+.hint{
+  position:absolute;left:16px;right:16px;bottom:10px;margin:0;text-align:center;pointer-events:none;
+  font-size:12px;letter-spacing:.06em;color:var(--ink-dim);transition:opacity .6s;
+}
+.hint.gone{opacity:0}
+.stage.editing .hint{opacity:1;color:var(--brass-hi)}
+
+/* ---------- layout edit bar (covers the readout bar while editing) ---------- */
+.editbar{
+  position:absolute;inset:0 0 -1px;z-index:15;display:flex;align-items:center;gap:12px;padding:6px 16px;
+  background:var(--panel);border-bottom:1px solid var(--line-strong);
+}
+.editbar p{flex:1;min-width:0;margin:0;font:700 15px/1.3 var(--f-ui);letter-spacing:.08em;color:var(--brass-hi);white-space:nowrap}
+.editbar label{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--ink-dim);white-space:nowrap;min-width:0}
+.editbar input[type=range]{width:130px;flex-shrink:1;min-width:70px}
+.editbar .btns{display:flex;gap:8px;margin-left:auto}
+.editbar .btn{padding:8px 12px}
+
+/* ---------- buttons & form ---------- */
+.btn{
+  padding:9px 16px;border-radius:12px;border:1px solid var(--line-strong);background:transparent;
+  color:var(--ink);font-size:14px;letter-spacing:.04em;cursor:pointer;touch-action:manipulation;white-space:nowrap;
+}
+.btn:active{background:rgba(214,162,74,.14)}
+.btn.primary{background:linear-gradient(180deg,var(--brass-hi),var(--brass));border-color:var(--brass-hi);color:var(--ink-on-brass);font-weight:700}
+.btn.primary:active{filter:brightness(.92)}
+input[type=range]{accent-color:var(--brass);width:100%;margin:0;touch-action:pan-x}
+
+/* ---------- sheets ---------- */
+.sheet-wrap{
+  position:absolute;inset:0;z-index:20;display:flex;align-items:flex-end;justify-content:center;
+  background:rgba(12,4,7,.6);padding:12px 12px 0;
+}
+.sheet{
+  width:min(560px,100%);max-height:100%;overflow:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;
+  background:var(--panel);border:1px solid var(--line-strong);border-bottom:0;border-radius:22px 22px 0 0;
+  padding:0 20px calc(24px + env(safe-area-inset-bottom,0px));box-shadow:0 -20px 50px rgba(0,0,0,.5);
+  -webkit-user-select:none;user-select:none;
+}
+.sheet-head{
+  position:sticky;top:0;z-index:1;display:flex;align-items:center;gap:12px;padding:16px 0 12px;
+  background:var(--panel);border-bottom:1px solid var(--line);margin-bottom:6px;
+}
+.sheet-head h2{flex:1;margin:0;font:700 18px/1.2 var(--f-ui);letter-spacing:.06em}
+.sheet-head p{margin:2px 0 0;font-size:12px;color:var(--ink-dim);letter-spacing:.02em}
+.sheet-head > div{flex:1;min-width:0}
+.group{display:grid;gap:10px;padding:16px 0;border-bottom:1px solid var(--line)}
+.group:last-child{border-bottom:0}
+.group h3{margin:0;font-size:12px;font-weight:500;letter-spacing:.14em;color:var(--brass)}
+.row{display:flex;align-items:center;justify-content:space-between;gap:12px;font-size:14px}
+.row output{color:var(--ink-dim);font-variant-numeric:tabular-nums;font-size:13px}
+.seg{display:flex;gap:3px;padding:3px;border-radius:13px;background:rgba(0,0,0,.28);border:1px solid var(--line)}
+.seg input{position:absolute;opacity:0;pointer-events:none}
+.seg label{
+  flex:1;padding:9px 6px;border-radius:10px;text-align:center;font-size:14px;color:var(--ink-dim);
+  cursor:pointer;touch-action:manipulation;transition:background .1s,color .1s;white-space:nowrap;
+}
+.seg input:checked+label{background:linear-gradient(180deg,var(--brass-hi),var(--brass));color:var(--ink-on-brass);font-weight:700}
+.help{margin:0;font-size:12.5px;color:var(--ink-dim);line-height:1.6}
+.warn{margin:0;font-size:13px;color:var(--warn);line-height:1.6}
+.inline{display:flex;gap:10px;align-items:stretch}
+.inline .seg{flex:1}
+.mic-meter{position:relative;height:10px;border-radius:6px;background:rgba(0,0,0,.35);border:1px solid var(--line)}
+.mic-meter i{position:absolute;left:0;top:0;bottom:0;width:0;border-radius:inherit;background:linear-gradient(90deg,var(--brass-lo),var(--brass-hi))}
+.mic-meter b{position:absolute;top:-4px;bottom:-4px;width:2px;margin-left:-1px;left:50%;background:var(--ink)}
+.btn-row{display:flex;flex-wrap:wrap;gap:8px}
+
+/* fingering chart */
+.chart-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(78px,1fr));gap:8px;padding:14px 0 4px}
+.cell{
+  display:grid;justify-items:center;gap:6px;padding:10px 4px 8px;border-radius:14px;cursor:pointer;
+  border:1px solid var(--line);background:rgba(246,220,150,.035);touch-action:manipulation;
+}
+.cell:active{background:rgba(214,162,74,.18)}
+.cell.cur{border-color:var(--brass-hi);background:rgba(214,162,74,.14)}
+.cell .cn{font:500 22px/1 var(--f-display);color:var(--ink)}
+.cell .cn small{font-size:.5em;opacity:.7}
+.dots{display:flex;gap:5px}
+.dots i{width:12px;height:12px;border-radius:50%;border:1.5px solid var(--brass)}
+.dots i.on{background:var(--brass-hi);border-color:var(--brass-hi)}
+.cell .cp{font-size:10px;color:var(--ink-dim);letter-spacing:.04em}
+
+/* start card */
+.start{
+  position:absolute;inset:0;z-index:30;display:flex;align-items:center;justify-content:center;padding:16px;overflow:auto;
+  background:radial-gradient(120% 80% at 50% 20%,rgba(51,19,30,.97),rgba(20,8,12,.98));
+}
+.start-card{width:min(440px,100%);display:grid;gap:14px;text-align:left}
+.trio{display:flex;gap:10px}
+.trio span{
+  width:30px;height:30px;border-radius:50%;padding:4px;
+  background:conic-gradient(from 200deg,var(--brass-lo),var(--brass-hi),var(--brass),var(--brass-lo),var(--brass-hi),var(--brass-lo));
+}
+.trio span::after{content:"";display:block;width:100%;height:100%;border-radius:50%;background:radial-gradient(circle at 35% 30%,#fffdf8,var(--pearl) 40%,#bfb19d)}
+.start .eyebrow{font-size:12px;letter-spacing:.2em;color:var(--brass)}
+.start h1{margin:0;font:700 46px/1.1 var(--f-title);letter-spacing:.1em;text-wrap:balance}
+.start p{margin:0;color:var(--ink);line-height:1.75;font-size:15px}
+.start ul{margin:0;padding-left:1.2em;color:var(--ink-dim);font-size:13.5px;line-height:1.75}
+.start .btn.primary{padding:14px 18px;font-size:17px;letter-spacing:.2em}
+.start small{color:var(--ink-dim);font-size:12px;line-height:1.6}
+
+.toast{
+  position:absolute;left:50%;top:76px;z-index:40;transform:translateX(-50%);max-width:min(440px,calc(100% - 32px));
+  padding:10px 14px;border-radius:12px;background:var(--panel);border:1px solid var(--line-strong);
+  font-size:13px;line-height:1.6;box-shadow:0 10px 30px rgba(0,0,0,.45);
+}
+
+@media (max-width:600px){
+  .editbar p{display:none}
+  .editbar{gap:10px}
+  .brand-name{display:none}
+  .tool span{display:none}
+  .tool{min-width:42px;padding:9px}
+  .bar{gap:8px}
+}
+@media (max-height:440px){
+  .bar{min-height:54px;padding-block:3px}
+  .readout .note{font-size:31px}
+  .tool span{display:none}
+  .tool{min-width:42px;padding:8px}
+  .start h1{font-size:34px}
+  .start-card{gap:10px}
+  .sheet-wrap{padding-top:8px}
+}
+@media (min-width:900px) and (min-height:600px){
+  .readout .note{font-size:48px}
+  .bar{min-height:80px}
+}
+@media (prefers-reduced-motion:reduce){
+  *{transition:none!important}
+}
+</style>
+<!-- page:head-end -->
+</head>
+<body>
+<!-- page:body -->
+<div id="app">
+  <header class="bar">
+    <div class="brand">
+      <span class="brand-name">口袋小號</span>
+      <span class="key" id="keyBadge" title="樂器調性">B♭ 小號</span>
+    </div>
+    <div class="readout" id="readout">
+      <div class="note" id="noteName">C<small>5</small></div>
+      <div class="concert" id="noteConcert">實際音 B♭4 · 466 Hz</div>
+    </div>
+    <nav class="actions" aria-label="工具">
+      <button class="tool" id="btnChart" type="button" aria-label="指法表">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="5" cy="12" r="3"/><circle cx="12" cy="12" r="3" fill="currentColor"/><circle cx="19" cy="12" r="3"/></svg>
+        <span>指法</span>
+      </button>
+      <button class="tool" id="btnLayout" type="button" aria-label="調整按鍵位置" aria-pressed="false">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v18M3 12h18M12 3l-3 3M12 3l3 3M12 21l-3-3M12 21l3-3M3 12l3-3M3 12l3 3M21 12l-3-3M21 12l-3 3"/></svg>
+        <span>位置</span>
+      </button>
+      <button class="tool" id="btnSettings" type="button" aria-label="設定">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/></svg>
+        <span>設定</span>
+      </button>
+    </nav>
+    <div class="meter" id="barMeter" hidden><i id="barFill"></i><b id="barThr"></b></div>
+    <div class="editbar" id="editBar" hidden>
+      <p>調整位置</p>
+      <label for="editSize"><span class="lbl">按鍵大小</span> <input type="range" id="editSize" min="60" max="160" step="1"></label>
+      <div class="btns">
+        <button class="btn" id="btnResetLayout" type="button">預設</button>
+        <button class="btn primary" id="btnDoneLayout" type="button">完成</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="stage" id="stage">
+    <div class="strip" id="strip" data-ctl="strip" role="group" aria-label="音域條（泛音）">
+      <span class="resize" id="stripResize" aria-hidden="true"></span>
+    </div>
+    <button class="valve" type="button" tabindex="-1" data-valve="0" data-ctl="v0" aria-label="第 1 號活塞"><span class="ring"><span class="pearl"><span class="num">1</span></span></span></button>
+    <button class="valve" type="button" tabindex="-1" data-valve="1" data-ctl="v1" aria-label="第 2 號活塞"><span class="ring"><span class="pearl"><span class="num">2</span></span></span></button>
+    <button class="valve" type="button" tabindex="-1" data-valve="2" data-ctl="v2" aria-label="第 3 號活塞"><span class="ring"><span class="pearl"><span class="num">3</span></span></span></button>
+    <p class="hint" id="hint">左手按住音域條發聲 · 右手按 1 2 3 號活塞</p>
+  </main>
+
+
+  <div class="sheet-wrap" id="settingsWrap" hidden>
+    <section class="sheet" role="dialog" aria-modal="true" aria-labelledby="settingsTitle">
+      <div class="sheet-head">
+        <h2 id="settingsTitle">設定</h2>
+        <button class="btn primary" id="btnCloseSettings" type="button">完成</button>
+      </div>
+
+      <div class="group">
+        <h3>吹奏方式</h3>
+        <div class="seg" role="radiogroup" aria-label="吹奏方式">
+          <input type="radio" name="mode" id="modeTouch" value="touch"><label for="modeTouch">觸控發聲</label>
+          <input type="radio" name="mode" id="modeMic" value="mic"><label for="modeMic">麥克風吹氣</label>
+        </div>
+        <p class="help" id="modeHelp"></p>
+        <div id="micBox" hidden>
+          <div class="group" style="padding:4px 0 0;border:0">
+            <div class="row"><label for="micSens">吹氣靈敏度</label><output id="micSensOut"></output></div>
+            <input type="range" id="micSens" min="0" max="100" step="1">
+            <div class="mic-meter" aria-hidden="true"><i id="micFill"></i><b id="micThr"></b></div>
+            <p class="help">吹氣時亮條要超過白線才會發聲。周圍吵雜就調低靈敏度。</p>
+          </div>
+        </div>
+        <p class="warn" id="micErr" hidden></p>
+      </div>
+
+      <div class="group">
+        <h3>聲道輸出</h3>
+        <div class="inline">
+          <div class="seg" role="radiogroup" aria-label="聲道輸出">
+            <input type="radio" name="channel" id="chStereo" value="stereo"><label for="chStereo">左右聲道</label>
+            <input type="radio" name="channel" id="chLeft" value="left"><label for="chLeft">只有左</label>
+            <input type="radio" name="channel" id="chRight" value="right"><label for="chRight">只有右</label>
+          </div>
+          <button class="btn" id="btnTestOut" type="button">試聽</button>
+        </div>
+        <p class="help">單聲道時，左右兩邊的聲音會合併到選定的那一邊。戴耳機最容易分辨。</p>
+      </div>
+
+      <div class="group">
+        <h3>聲音</h3>
+        <div class="row"><label for="volume">音量</label><output id="volumeOut"></output></div>
+        <input type="range" id="volume" min="0" max="100" step="1">
+        <div class="row"><label for="reverb">殘響</label><output id="reverbOut"></output></div>
+        <input type="range" id="reverb" min="0" max="100" step="1">
+        <div class="row"><label for="vibrato">抖音</label><output id="vibratoOut"></output></div>
+        <input type="range" id="vibrato" min="0" max="100" step="1">
+      </div>
+
+      <div class="group">
+        <h3>樂器與音名</h3>
+        <div class="seg" role="radiogroup" aria-label="樂器">
+          <input type="radio" name="horn" id="hornBb" value="bb"><label for="hornBb">B♭ 小號</label>
+          <input type="radio" name="horn" id="hornC" value="c"><label for="hornC">C 小號</label>
+        </div>
+        <div class="seg" role="radiogroup" aria-label="音名">
+          <input type="radio" name="naming" id="nameLetter" value="letter"><label for="nameLetter">C D E</label>
+          <input type="radio" name="naming" id="nameSolfege" value="solfege"><label for="nameSolfege">Do Re Mi</label>
+        </div>
+        <p class="help">畫面上顯示的是小號記譜音（和小號樂譜相同）。B♭ 小號實際發出的音比記譜低一個全音。</p>
+      </div>
+
+      <div class="group">
+        <h3>按鍵位置</h3>
+        <div class="row"><label for="valveSize">按鍵大小</label><output id="valveSizeOut"></output></div>
+        <input type="range" id="valveSize" min="60" max="160" step="1">
+        <div class="btn-row">
+          <button class="btn" id="btnEditFromSettings" type="button">拖曳調整位置</button>
+          <button class="btn" id="btnResetFromSettings" type="button">恢復預設位置</button>
+        </div>
+        <p class="help">直拿和橫拿各自記住一組位置。</p>
+      </div>
+    </section>
+  </div>
+
+  <div class="sheet-wrap" id="chartWrap" hidden>
+    <section class="sheet" role="dialog" aria-modal="true" aria-labelledby="chartTitle">
+      <div class="sheet-head">
+        <div>
+          <h2 id="chartTitle">指法表</h2>
+          <p id="chartSub">記譜音。點一下可以試聽，數字是使用的泛音。</p>
+        </div>
+        <button class="btn primary" id="btnCloseChart" type="button">關閉</button>
+      </div>
+      <div class="chart-grid" id="chartGrid"></div>
+    </section>
+  </div>
+
+  <div class="start" id="startOverlay">
+    <div class="start-card">
+      <div class="trio" aria-hidden="true"><span></span><span></span><span></span></div>
+      <p class="eyebrow">B♭ 小號 · 手機 / iPad</p>
+      <h1>口袋小號</h1>
+      <p>左手按住音域條就會發聲，右手按 1・2・3 號活塞改變音高，指法和真的小號一樣。</p>
+      <ul>
+        <li>「位置」可以把三個活塞和音域條拖到順手的地方。</li>
+        <li>「設定」可以改用麥克風吹氣，或切換左右聲道、只有左、只有右。</li>
+        <li>電腦鍵盤：J K L 是活塞，1–6 選音域並發聲，空白鍵吹奏。</li>
+      </ul>
+      <button class="btn primary" id="btnStart" type="button">開始吹奏</button>
+      <small>沒有聲音的話，請調高音量；iPhone 請確認沒有開啟靜音模式。</small>
+    </div>
+  </div>
+
+  <div class="toast" id="toast" role="status" hidden></div>
+</div>
+
+<script>
+(() => {
+'use strict';
+
+/* ================= basics ================= */
+const $ = (s) => document.querySelector(s);
+const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
+const store = {
+  get(k, d) { try { const v = localStorage.getItem('pocket-trumpet:' + k); return v == null ? d : JSON.parse(v); } catch (e) { return d; } },
+  set(k, v) { try { localStorage.setItem('pocket-trumpet:' + k, JSON.stringify(v)); } catch (e) { /* storage unavailable */ } }
+};
+
+// Open-horn partials in written pitch (MIDI). The 7th partial is out of tune on a real trumpet and is skipped.
+const PARTIALS = [
+  { n: 2, midi: 60 }, { n: 3, midi: 67 }, { n: 4, midi: 72 },
+  { n: 5, midi: 76 }, { n: 6, midi: 79 }, { n: 8, midi: 84 }
+];
+const VALVE_STEPS = [2, 1, 3];                       // semitones lowered by valve 1, 2, 3
+const OFFSET_VALVES = [[], [1], [0], [0, 1], [1, 2], [0, 2], [0, 1, 2]];
+const NAMES = {
+  letter: ['C', 'C♯', 'D', 'E♭', 'E', 'F', 'F♯', 'G', 'G♯', 'A', 'B♭', 'B'],
+  solfege: ['Do', 'Do♯', 'Re', 'Mi♭', 'Mi', 'Fa', 'Fa♯', 'Sol', 'Sol♯', 'La', 'Si♭', 'Si']
+};
+
+const DEFAULTS = { mode: 'touch', channel: 'stereo', volume: 80, reverb: 25, vibrato: 15, horn: 'bb', naming: 'letter', micSens: 55, valveScale: 100 };
+function sanitize(s) {
+  const enums = { mode: ['touch', 'mic'], channel: ['stereo', 'left', 'right'], horn: ['bb', 'c'], naming: ['letter', 'solfege'] };
+  for (const k in enums) if (!enums[k].includes(s[k])) s[k] = DEFAULTS[k];
+  for (const k of ['volume', 'reverb', 'vibrato', 'micSens']) { const n = Number(s[k]); s[k] = Number.isFinite(n) ? clamp(n, 0, 100) : DEFAULTS[k]; }
+  const vs = Number(s.valveScale); s.valveScale = Number.isFinite(vs) ? clamp(vs, 60, 160) : DEFAULTS.valveScale;
+  return s;
+}
+const settings = sanitize(Object.assign({}, DEFAULTS, store.get('settings', {})));
+const saveSettings = () => store.set('settings', settings);
+
+const transpose = () => (settings.horn === 'bb' ? -2 : 0);
+const freqOf = (m) => 440 * Math.pow(2, (m - 69) / 12);
+function noteLabel(midi) {
+  return { name: NAMES[settings.naming][((midi % 12) + 12) % 12], oct: Math.floor(midi / 12) - 1 };
+}
+const noteHTML = (midi) => { const l = noteLabel(midi); return l.name + '<small>' + l.oct + '</small>'; };
+const noteText = (midi) => { const l = noteLabel(midi); return l.name + l.oct; };
+
+/* ================= sound ================= */
+function hold(param, t) {
+  if (param.cancelAndHoldAtTime) { param.cancelAndHoldAtTime(t); return; }
+  const v = param.value; param.cancelScheduledValues(t); param.setValueAtTime(v, t);
+}
+function chain(...nodes) { for (let i = 0; i < nodes.length - 1; i++) nodes[i].connect(nodes[i + 1]); }
+function tanhCurve(k) {
+  const n = 1024, c = new Float32Array(n), d = Math.tanh(k);
+  for (let i = 0; i < n; i++) { const x = (i / (n - 1)) * 2 - 1; c[i] = Math.tanh(k * x) / d; }
+  return c;
+}
+function makeIR(c, sec) {
+  const rate = c.sampleRate, len = Math.floor(rate * sec), pre = Math.floor(rate * 0.014);
+  const b = c.createBuffer(2, len, rate);
+  for (let ch = 0; ch < 2; ch++) {
+    const d = b.getChannelData(ch); let lp = 0;
+    for (let i = pre; i < len; i++) {
+      const t = (i - pre) / (len - pre);
+      lp += (0.07 + 0.55 * (1 - t)) * ((Math.random() * 2 - 1) - lp);   // tail darkens as it decays
+      d[i] = lp * Math.pow(1 - t, 3.2);
+    }
+  }
+  return b;
+}
+
+// Monophonic brass voice: harmonic-rich wave -> breath-driven lowpass -> bell resonance -> soft clip.
+// Output passes a 2x2 channel matrix so it can play on both sides, only left or only right.
+class Horn {
+  constructor(ctx) {
+    const c = this.ctx = ctx;
+    const N = 48, real = new Float32Array(N + 1), imag = new Float32Array(N + 1);
+    for (let n = 1; n <= N; n++) imag[n] = Math.pow(n, -0.8);
+    imag[1] *= 0.75;
+    this.oscA = c.createOscillator(); this.oscA.setPeriodicWave(c.createPeriodicWave(real, imag));
+    this.oscB = c.createOscillator(); this.oscB.type = 'sawtooth'; this.oscB.detune.value = 7;
+    const mixB = c.createGain(); mixB.gain.value = 0.16;
+    this.filter = c.createBiquadFilter(); this.filter.type = 'lowpass'; this.filter.Q.value = 0.8; this.filter.frequency.value = 600;
+    const bell = c.createBiquadFilter(); bell.type = 'peaking'; bell.frequency.value = 1300; bell.Q.value = 1.1; bell.gain.value = 4;
+    const hp = c.createBiquadFilter(); hp.type = 'highpass'; hp.frequency.value = 90; hp.Q.value = 0.7;
+    this.amp = c.createGain(); this.amp.gain.value = 0;
+    const shaper = c.createWaveShaper(); shaper.curve = tanhCurve(1.8); shaper.oversample = '2x';
+    const post = c.createGain(); post.gain.value = 0.85;
+    const bus = c.createGain();
+    this.oscA.connect(this.filter);
+    chain(this.oscB, mixB, this.filter);
+    chain(this.filter, bell, hp, this.amp, shaper, post, bus);
+
+    // breath noise at the attack
+    const nb = c.createBuffer(1, c.sampleRate * 2, c.sampleRate), nd = nb.getChannelData(0);
+    for (let i = 0; i < nd.length; i++) nd[i] = Math.random() * 2 - 1;
+    this.noise = c.createBufferSource(); this.noise.buffer = nb; this.noise.loop = true;
+    const nf = c.createBiquadFilter(); nf.type = 'bandpass'; nf.frequency.value = 1800; nf.Q.value = 0.9;
+    this.noiseGain = c.createGain(); this.noiseGain.gain.value = 0;
+    chain(this.noise, nf, this.noiseGain, bus);
+
+    // vibrato
+    this.lfo = c.createOscillator(); this.lfo.frequency.value = 5.3;
+    this.vib = c.createGain(); this.vib.gain.value = 0;
+    this.lfo.connect(this.vib); this.vib.connect(this.oscA.detune); this.vib.connect(this.oscB.detune);
+
+    // room
+    this.dry = c.createGain(); this.wet = c.createGain(); this.wet.gain.value = 0;
+    this.verb = c.createConvolver(); this.verb.buffer = makeIR(c, 2.0);
+    this.master = c.createGain();
+    this.master.channelCount = 2; this.master.channelCountMode = 'explicit'; this.master.channelInterpretation = 'speakers';
+    chain(bus, this.dry, this.master);
+    chain(bus, this.verb, this.wet, this.master);
+    const comp = c.createDynamicsCompressor();
+    comp.threshold.value = -10; comp.knee.value = 6; comp.ratio.value = 8; comp.attack.value = 0.003; comp.release.value = 0.15;
+    this.master.connect(comp);
+
+    // channel matrix: [L->L, R->L, L->R, R->R]
+    const split = c.createChannelSplitter(2), merge = c.createChannelMerger(2);
+    comp.connect(split);
+    this.mx = [0, 1, 2, 3].map(() => c.createGain());
+    split.connect(this.mx[0], 0); split.connect(this.mx[1], 1);
+    split.connect(this.mx[2], 0); split.connect(this.mx[3], 1);
+    this.mx[0].connect(merge, 0, 0); this.mx[1].connect(merge, 0, 0);
+    this.mx[2].connect(merge, 0, 1); this.mx[3].connect(merge, 0, 1);
+    merge.connect(c.destination);
+
+    this.sounding = false; this.freq = 440; this.level = 0.7; this.vibDepth = 0; this.onAt = 0;
+    [this.oscA, this.oscB, this.noise, this.lfo].forEach((n) => n.start());
+  }
+  ampFor(l) { return 0.04 + 0.42 * Math.pow(l, 1.3); }
+  cutFor(f, l) { const p = Math.pow(l, 1.5); return Math.min(15000, f * (1.5 + 7 * p) + 2200 * p + 200); }
+  noteOn(freq, level) {
+    const t = this.ctx.currentTime;
+    this.sounding = true; this.freq = freq; this.level = level; this.onAt = t;
+    for (const o of [this.oscA, this.oscB]) {          // lips "scoop" up to the pitch
+      hold(o.frequency, t); o.frequency.setValueAtTime(freq * 0.975, t); o.frequency.setTargetAtTime(freq, t, 0.018);
+    }
+    const a = this.ampFor(level), cf = this.cutFor(freq, level);
+    hold(this.amp.gain, t); this.amp.gain.setTargetAtTime(a * 1.25, t, 0.006); this.amp.gain.setTargetAtTime(a, t + 0.045, 0.06);
+    hold(this.filter.frequency, t);
+    this.filter.frequency.setValueAtTime(Math.max(freq * 1.1, 200), t);
+    this.filter.frequency.setTargetAtTime(cf * 1.35, t, 0.012);
+    this.filter.frequency.setTargetAtTime(cf, t + 0.05, 0.09);
+    hold(this.noiseGain.gain, t);
+    this.noiseGain.gain.setTargetAtTime(0.05 * (0.4 + level), t, 0.004);
+    this.noiseGain.gain.setTargetAtTime(0.004 + 0.01 * level, t + 0.025, 0.05);
+    hold(this.vib.gain, t); this.vib.gain.setValueAtTime(0, t); this.vib.gain.setTargetAtTime(this.vibDepth, t + 0.22, 0.22);
+  }
+  glide(freq) {                                         // legato: valve change or lip slur
+    const t = this.ctx.currentTime;
+    for (const o of [this.oscA, this.oscB]) { hold(o.frequency, t); o.frequency.setTargetAtTime(freq, t, 0.011); }
+    const a = this.ampFor(this.level);
+    hold(this.amp.gain, t); this.amp.gain.setTargetAtTime(a * 0.55, t, 0.006); this.amp.gain.setTargetAtTime(a, t + 0.022, 0.02);
+    hold(this.filter.frequency, t); this.filter.frequency.setTargetAtTime(this.cutFor(freq, this.level), t, 0.03);
+    this.freq = freq;
+  }
+  setLevel(level) {
+    if (!this.sounding) return;
+    this.level = level;
+    const t = this.ctx.currentTime;
+    if (t - this.onAt < 0.07) return;                  // let the attack finish
+    hold(this.amp.gain, t); this.amp.gain.setTargetAtTime(this.ampFor(level), t, 0.035);
+    hold(this.filter.frequency, t); this.filter.frequency.setTargetAtTime(this.cutFor(this.freq, level), t, 0.045);
+    hold(this.noiseGain.gain, t); this.noiseGain.gain.setTargetAtTime(0.004 + 0.012 * level, t, 0.05);
+  }
+  noteOff() {
+    const t = this.ctx.currentTime;
+    this.sounding = false;
+    hold(this.amp.gain, t); this.amp.gain.setTargetAtTime(0, t, 0.03);
+    hold(this.noiseGain.gain, t); this.noiseGain.gain.setTargetAtTime(0, t, 0.02);
+    hold(this.filter.frequency, t); this.filter.frequency.setTargetAtTime(Math.max(this.freq, 200), t, 0.05);
+  }
+  setChannel(mode) {
+    const m = { stereo: [1, 0, 0, 1], left: [0.5, 0.5, 0, 0], right: [0, 0, 0.5, 0.5] }[mode] || [1, 0, 0, 1];
+    const t = this.ctx.currentTime;
+    this.mx.forEach((g, i) => { hold(g.gain, t); g.gain.setTargetAtTime(m[i], t, 0.008); });
+  }
+  setVolume(v) { const t = this.ctx.currentTime; hold(this.master.gain, t); this.master.gain.setTargetAtTime(Math.pow(v, 1.5) * 1.1, t, 0.02); }
+  setReverb(r) {
+    const t = this.ctx.currentTime;
+    hold(this.wet.gain, t); this.wet.gain.setTargetAtTime(r * 0.6, t, 0.03);
+    hold(this.dry.gain, t); this.dry.gain.setTargetAtTime(1 - r * 0.3, t, 0.03);
+  }
+  setVibrato(cents) {
+    this.vibDepth = cents;
+    if (this.sounding) { const t = this.ctx.currentTime; hold(this.vib.gain, t); this.vib.gain.setTargetAtTime(cents, t, 0.1); }
+  }
+}
+
+/* ================= breath via microphone ================= */
+const Mic = {
+  stream: null, src: null, analyser: null, buf: null,
+  async start(ctx) {
+    if (this.analyser) return;
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) { const e = new Error('unsupported'); e.name = 'Unsupported'; throw e; }
+    try { if (navigator.audioSession) navigator.audioSession.type = 'play-and-record'; } catch (e) { /* not supported */ }
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: false } });
+    this.stream = stream;
+    this.src = ctx.createMediaStreamSource(stream);
+    // Blowing on a mic is mostly low-frequency rumble; phone speakers make little of it, which keeps feedback down.
+    const lp = ctx.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 320; lp.Q.value = 0.5;
+    this.analyser = ctx.createAnalyser(); this.analyser.fftSize = 1024;
+    this.src.connect(lp); lp.connect(this.analyser);
+    this.buf = new Uint8Array(this.analyser.fftSize);
+  },
+  stop() {
+    if (this.stream) this.stream.getTracks().forEach((t) => t.stop());
+    if (this.src) this.src.disconnect();
+    this.stream = this.src = this.analyser = this.buf = null;
+    try { if (navigator.audioSession) navigator.audioSession.type = 'playback'; } catch (e) { /* not supported */ }
+  },
+  readDb() {
+    this.analyser.getByteTimeDomainData(this.buf);
+    let s = 0;
+    for (let i = 0; i < this.buf.length; i++) { const v = (this.buf[i] - 128) / 128; s += v * v; }
+    return 20 * Math.log10(Math.sqrt(s / this.buf.length) + 1e-6);
+  }
+};
+function micErrorText(err) {
+  const n = err && err.name;
+  if (n === 'Unsupported') return '這個瀏覽器不能使用麥克風（網址需要是 https）。已改回觸控發聲。';
+  if (n === 'NotFoundError' || n === 'OverconstrainedError') return '找不到麥克風。已改回觸控發聲。';
+  if (n === 'NotReadableError') return '麥克風正被其他 App 使用。關掉那個 App 後再試一次。';
+  return '沒有麥克風權限，或這個頁面所在的環境不允許使用麥克風。請到瀏覽器設定允許麥克風；或改用觸控發聲。';
+}
+
+/* ================= state ================= */
+const ctl = {
+  valves: [new Set(), new Set(), new Set()],   // pointer ids holding each valve
+  keyValves: [false, false, false],
+  strip: new Map(),                            // pointer id -> zone, latest last
+  blowKeys: new Set(),
+  partial: 2,
+  breath: 0, breathOn: false
+};
+let ctx = null, horn = null, editing = false, previewing = false, previewTimer = 0;
+
+const valveDown = (i) => ctl.valves[i].size > 0 || ctl.keyValves[i];
+function valveOffset() { let s = 0; for (let i = 0; i < 3; i++) if (valveDown(i)) s += VALVE_STEPS[i]; return s; }
+const writtenMidi = () => PARTIALS[ctl.partial].midi - valveOffset();
+function wantsSound() {
+  if (editing || !horn) return false;
+  if (ctl.blowKeys.size > 0) return true;
+  return settings.mode === 'mic' ? ctl.breathOn : ctl.strip.size > 0;
+}
+const playLevel = () => (settings.mode === 'mic' && ctl.breathOn ? 0.15 + 0.85 * ctl.breath : 0.72);
+
+function update() {
+  const want = wantsSound();
+  if (horn) {
+    if (want && previewing) stopPreview(false);
+    if (!previewing) {
+      const f = freqOf(writtenMidi() + transpose());
+      if (want && !horn.sounding) horn.noteOn(f, playLevel());
+      else if (!want && horn.sounding) horn.noteOff();
+      else if (want && Math.abs(f - horn.freq) > 0.01) horn.glide(f);
+    }
+  }
+  render(want);
+}
+
+/* ================= audio setup ================= */
+function ensureAudio() {
+  if (!ctx) {
+    try { if (navigator.audioSession && settings.mode !== 'mic') navigator.audioSession.type = 'playback'; } catch (e) { /* not supported */ }
+    const AC = window.AudioContext || window.webkitAudioContext;
+    try { ctx = new AC({ latencyHint: 'interactive' }); } catch (e) { ctx = new AC(); }
+    horn = new Horn(ctx);
+    applyAudioSettings();
+    const b = ctx.createBuffer(1, 1, 22050), s = ctx.createBufferSource();   // iOS unlock
+    s.buffer = b; s.connect(ctx.destination); s.start(0);
+  }
+  if (ctx.state !== 'running') ctx.resume().catch(() => {});
+  return ctx;
+}
+function applyAudioSettings() {
+  if (!horn) return;
+  horn.setChannel(settings.channel);
+  horn.setVolume(settings.volume / 100);
+  horn.setReverb(settings.reverb / 100);
+  horn.setVibrato((settings.vibrato / 100) * 32);
+}
+function preview(list, step) {
+  ensureAudio();
+  if (horn.sounding && !previewing) return;
+  clearTimeout(previewTimer);
+  previewing = true;
+  let i = 0;
+  const next = () => {
+    if (i >= list.length) { horn.noteOff(); previewing = false; return; }
+    const f = freqOf(list[i] + transpose());
+    if (i === 0 || !horn.sounding) horn.noteOn(f, 0.7); else horn.glide(f);
+    i++; previewTimer = setTimeout(next, step * 1000);
+  };
+  next();
+}
+function stopPreview(silence) { clearTimeout(previewTimer); previewing = false; if (silence && horn) horn.noteOff(); }
+
+/* ================= mic loop ================= */
+let micRAF = 0, dbS = -100, offFrames = 0;
+const micThreshold = () => -12 - settings.micSens * 0.42;     // dBFS
+function startMicLoop() {
+  cancelAnimationFrame(micRAF);
+  const tick = () => {
+    if (!Mic.analyser || settings.mode !== 'mic') { micRAF = 0; return; }
+    const db = Mic.readDb();
+    dbS += (db - dbS) * (db > dbS ? 0.6 : 0.3);
+    const thr = micThreshold();
+    ctl.breath += (clamp((dbS - thr) / 22, 0, 1) - ctl.breath) * 0.35;
+    let changed = false;
+    if (!ctl.breathOn && dbS > thr) { ctl.breathOn = true; offFrames = 0; changed = true; }
+    else if (ctl.breathOn) {
+      if (dbS < thr - 3) { if (++offFrames > 3) { ctl.breathOn = false; changed = true; } }
+      else offFrames = 0;
+    }
+    if (changed) update();
+    else if (ctl.breathOn && horn && horn.sounding && !previewing) horn.setLevel(playLevel());
+    drawMeters(dbS, thr);
+    micRAF = requestAnimationFrame(tick);
+  };
+  micRAF = requestAnimationFrame(tick);
+}
+function drawMeters(db, thr) {
+  const p = (x) => (clamp((x + 70) / 66, 0, 1) * 100).toFixed(1) + '%';
+  $('#barFill').style.width = p(db); $('#barThr').style.left = p(thr);
+  $('#micFill').style.width = p(db); $('#micThr').style.left = p(thr);
+}
+async function setMode(mode) {
+  $('#micErr').hidden = true;
+  if (mode === 'mic') {
+    ensureAudio();
+    try {
+      await Mic.start(ctx);
+      settings.mode = 'mic';
+      startMicLoop();
+    } catch (err) {
+      Mic.stop();
+      settings.mode = 'touch';
+      $('#micErr').textContent = micErrorText(err);
+      $('#micErr').hidden = false;
+    }
+  } else {
+    Mic.stop();
+    settings.mode = 'touch';
+    ctl.breathOn = false; ctl.breath = 0;
+  }
+  saveSettings(); syncControls(); update();
+}
+
+/* ================= rendering ================= */
+const stage = $('#stage'), strip = $('#strip'), resizeEl = $('#stripResize');
+const valveEls = [...document.querySelectorAll('.valve')];
+const zoneEls = PARTIALS.map((p) => {
+  const z = document.createElement('div');
+  z.className = 'zone';
+  z.innerHTML = '<span class="pn">' + p.n + '</span><span class="zn"></span>';
+  strip.insertBefore(z, resizeEl);
+  return z;
+});
+let lastSig = '', hintGone = false;
+function render(sounding) {
+  const off = valveOffset(), w = writtenMidi();
+  const sig = [w, off, ctl.partial, sounding ? 1 : 0, settings.naming, settings.horn, [0, 1, 2].map((i) => (valveDown(i) ? 1 : 0)).join('')].join('|');
+  if (sig === lastSig) return;
+  lastSig = sig;
+  valveEls.forEach((el, i) => el.classList.toggle('down', valveDown(i)));
+  zoneEls.forEach((z, i) => {
+    z.lastChild.innerHTML = noteHTML(PARTIALS[i].midi - off);
+    z.classList.toggle('sel', i === ctl.partial);
+    z.classList.toggle('on', sounding && i === ctl.partial);
+  });
+  $('#noteName').innerHTML = noteHTML(w);
+  $('#readout').classList.toggle('live', sounding);
+  const cm = w + transpose(), hz = Math.round(freqOf(cm));
+  $('#noteConcert').textContent = '實際音 ' + noteText(cm) + ' · ' + hz + ' Hz';
+  if (sounding && !hintGone) { hintGone = true; $('#hint').classList.add('gone'); }
+}
+
+/* ================= layout ================= */
+function defaultLayout(land) {
+  return land
+    ? { strip: { x: 0.03, y: 0.06, w: 0.17, h: 0.88 }, v0: { x: 0.55, y: 0.55 }, v1: { x: 0.705, y: 0.55 }, v2: { x: 0.86, y: 0.55 } }
+    : { strip: { x: 0.05, y: 0.04, w: 0.3, h: 0.9 }, v0: { x: 0.72, y: 0.27 }, v1: { x: 0.72, y: 0.5 }, v2: { x: 0.72, y: 0.73 } };
+}
+const layouts = store.get('layouts', {});
+let layoutKey = '';
+function currentLayout() {
+  const L = layouts[layoutKey];
+  const ok = L && L.strip && ['v0', 'v1', 'v2'].every((k) => L[k] && Number.isFinite(L[k].x) && Number.isFinite(L[k].y));
+  if (!ok) layouts[layoutKey] = defaultLayout(layoutKey === 'land');
+  return layouts[layoutKey];
+}
+function valveSize() {
+  const base = clamp(Math.min(stage.clientWidth, stage.clientHeight) * 0.25, 60, 150);
+  return Math.round(base * settings.valveScale / 100);
+}
+function applyLayout() {
+  const W = stage.clientWidth, H = stage.clientHeight;
+  if (!W || !H) return;
+  layoutKey = W >= H ? 'land' : 'port';
+  const L = currentLayout(), size = valveSize(), m = 6;
+  valveEls.forEach((el, i) => {
+    const p = L['v' + i];
+    const cx = clamp(p.x * W, size / 2 + m, W - size / 2 - m), cy = clamp(p.y * H, size / 2 + m, H - size / 2 - m);
+    el.style.width = el.style.height = size + 'px';
+    el.style.left = (cx - size / 2) + 'px'; el.style.top = (cy - size / 2) + 'px';
+    el.style.setProperty('--vs', size + 'px');
+  });
+  const s = L.strip;
+  const w = clamp(s.w * W, 56, W - 2 * m), h = clamp(s.h * H, 56, H - 2 * m);
+  const x = clamp(s.x * W, m, W - w - m), y = clamp(s.y * H, m, H - h - m);
+  Object.assign(strip.style, { left: x + 'px', top: y + 'px', width: w + 'px', height: h + 'px' });
+  strip.classList.toggle('horizontal', w > h);
+}
+function saveLayouts() { store.set('layouts', layouts); }
+
+/* drag in edit mode */
+const drags = new Map();
+function beginDrag(e, el, kind) {
+  e.preventDefault();
+  try { el.setPointerCapture(e.pointerId); } catch (err) { /* ignore */ }
+  const r = el.getBoundingClientRect();
+  drags.set(e.pointerId, { el, kind, key: el.dataset.ctl, sx: e.clientX, sy: e.clientY, l: el.offsetLeft, t: el.offsetTop, w: r.width, h: r.height });
+  el.classList.add('dragging');
+}
+function moveDrag(e) {
+  const d = drags.get(e.pointerId);
+  if (!d) return;
+  const W = stage.clientWidth, H = stage.clientHeight, L = currentLayout();
+  const dx = e.clientX - d.sx, dy = e.clientY - d.sy;
+  if (d.key === 'strip') {
+    if (d.kind === 'resize') {
+      L.strip.w = clamp(d.w + dx, 56, W - d.l - 6) / W;
+      L.strip.h = clamp(d.h + dy, 56, H - d.t - 6) / H;
+    } else {
+      L.strip.x = clamp(d.l + dx, 6, W - d.w - 6) / W;
+      L.strip.y = clamp(d.t + dy, 6, H - d.h - 6) / H;
+    }
+  } else {
+    L[d.key].x = clamp(d.l + d.w / 2 + dx, d.w / 2 + 6, W - d.w / 2 - 6) / W;
+    L[d.key].y = clamp(d.t + d.h / 2 + dy, d.h / 2 + 6, H - d.h / 2 - 6) / H;
+  }
+  applyLayout();
+}
+function endDrag(e) {
+  const d = drags.get(e.pointerId);
+  if (!d) return false;
+  d.el.classList.remove('dragging');
+  drags.delete(e.pointerId);
+  saveLayouts();
+  return true;
+}
+function setEditing(on) {
+  editing = on;
+  stopPreview(true);
+  releaseAll();
+  stage.classList.toggle('editing', on);
+  $('#editBar').hidden = !on;
+  $('#btnLayout').setAttribute('aria-pressed', on ? 'true' : 'false');
+  $('#editSize').value = settings.valveScale;
+  syncControls();
+  if (!on) toast('位置已儲存');
+  update();
+}
+function resetLayout() {
+  delete layouts[layoutKey];
+  saveLayouts(); applyLayout();
+  toast('已恢復預設位置');
+}
+
+/* ================= input ================= */
+function zoneAt(e) {
+  const r = strip.getBoundingClientRect();
+  const f = r.width > r.height ? (e.clientX - r.left) / r.width : 1 - (e.clientY - r.top) / r.height;
+  return clamp(Math.floor(f * PARTIALS.length), 0, PARTIALS.length - 1);
+}
+function partialFromStrip() { if (ctl.strip.size) ctl.partial = [...ctl.strip.values()].pop(); }
+function wake() { if (ctx && ctx.state !== 'running') ctx.resume().catch(() => {}); }
+
+strip.addEventListener('pointerdown', (e) => {
+  if (editing) return beginDrag(e, strip, e.target === resizeEl ? 'resize' : 'move');
+  e.preventDefault(); wake();
+  try { strip.setPointerCapture(e.pointerId); } catch (err) { /* ignore */ }
+  ctl.strip.set(e.pointerId, zoneAt(e));
+  partialFromStrip(); update();
+});
+strip.addEventListener('pointermove', (e) => {
+  if (drags.has(e.pointerId)) return moveDrag(e);
+  if (!ctl.strip.has(e.pointerId)) return;
+  const z = zoneAt(e);
+  if (z !== ctl.strip.get(e.pointerId)) { ctl.strip.delete(e.pointerId); ctl.strip.set(e.pointerId, z); partialFromStrip(); update(); }
+});
+const stripUp = (e) => {
+  if (endDrag(e)) return;
+  if (ctl.strip.delete(e.pointerId)) { partialFromStrip(); update(); }
+};
+['pointerup', 'pointercancel', 'lostpointercapture'].forEach((t) => strip.addEventListener(t, stripUp));
+
+valveEls.forEach((el, i) => {
+  el.addEventListener('pointerdown', (e) => {
+    if (editing) return beginDrag(e, el, 'move');
+    e.preventDefault(); wake();
+    try { el.setPointerCapture(e.pointerId); } catch (err) { /* ignore */ }
+    ctl.valves[i].add(e.pointerId); update();
+  });
+  el.addEventListener('pointermove', (e) => { if (drags.has(e.pointerId)) moveDrag(e); });
+  const up = (e) => { if (endDrag(e)) return; if (ctl.valves[i].delete(e.pointerId)) update(); };
+  ['pointerup', 'pointercancel', 'lostpointercapture'].forEach((t) => el.addEventListener(t, up));
+  el.addEventListener('contextmenu', (e) => e.preventDefault());
+});
+
+// keep iOS from zooming, selecting or scrolling while playing
+stage.addEventListener('touchstart', (e) => { if (e.cancelable) e.preventDefault(); }, { passive: false });
+document.addEventListener('touchmove', (e) => {
+  if (e.target.closest('.sheet, .editbar, .start, input') || !e.cancelable) return;
+  e.preventDefault();
+}, { passive: false });
+document.addEventListener('gesturestart', (e) => e.preventDefault());
+document.addEventListener('dblclick', (e) => e.preventDefault());
+stage.addEventListener('contextmenu', (e) => e.preventDefault());
+
+const KEY_VALVE = { KeyJ: 0, KeyK: 1, KeyL: 2 };
+document.addEventListener('keydown', (e) => {
+  if (!horn || editing || !$('#settingsWrap').hidden || !$('#chartWrap').hidden) {
+    if (e.key === 'Escape') closeSheets();
+    return;
+  }
+  if (e.metaKey || e.ctrlKey || e.altKey) return;
+  if (e.code in KEY_VALVE) { e.preventDefault(); if (!e.repeat) { ctl.keyValves[KEY_VALVE[e.code]] = true; update(); } return; }
+  const dm = /^Digit([1-6])$/.exec(e.code);
+  if (dm) { e.preventDefault(); if (!e.repeat) { ctl.partial = Number(dm[1]) - 1; ctl.blowKeys.add(e.code); update(); } return; }
+  if (e.code === 'Space') { e.preventDefault(); if (!e.repeat) { ctl.blowKeys.add(e.code); update(); } return; }
+  if (e.code === 'ArrowUp' || e.code === 'ArrowDown') {
+    e.preventDefault();
+    ctl.partial = clamp(ctl.partial + (e.code === 'ArrowUp' ? 1 : -1), 0, PARTIALS.length - 1); update();
+  }
+});
+document.addEventListener('keyup', (e) => {
+  if (e.code in KEY_VALVE) { ctl.keyValves[KEY_VALVE[e.code]] = false; update(); }
+  else if (ctl.blowKeys.delete(e.code)) update();
+});
+
+function releaseAll() {
+  ctl.valves.forEach((s) => s.clear());
+  ctl.keyValves = [false, false, false];
+  ctl.strip.clear(); ctl.blowKeys.clear();
+  ctl.breathOn = false;
+  update();
+}
+window.addEventListener('blur', releaseAll);
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden) releaseAll();
+  else { wake(); requestWakeLock(); }
+});
+
+/* ================= settings UI ================= */
+function syncControls() {
+  for (const name of ['mode', 'channel', 'horn', 'naming']) {
+    const r = document.querySelector('input[name="' + name + '"][value="' + settings[name] + '"]');
+    if (r) r.checked = true;
+  }
+  for (const id of ['volume', 'reverb', 'vibrato', 'micSens']) { $('#' + id).value = settings[id]; $('#' + id + 'Out').textContent = settings[id]; }
+  $('#valveSize').value = settings.valveScale; $('#valveSizeOut').textContent = settings.valveScale + '%';
+  $('#editSize').value = settings.valveScale;
+  const mic = settings.mode === 'mic' && !!Mic.analyser;
+  $('#micBox').hidden = !mic;
+  $('#barMeter').hidden = !mic;
+  $('#modeHelp').textContent = settings.mode === 'mic'
+    ? '對著手機底部的麥克風吹氣就會發聲，吹越用力越大聲、越亮。音域條改成用點的選擇音域。建議戴有線耳機，避免喇叭聲音被麥克風收進去；iPhone 搭配藍牙耳機時，系統可能改成單聲道。'
+    : '按住音域條就發聲，放開就停，像用舌頭吐音。手指在音域條上滑動可以換音域。';
+  $('#hint').textContent = editing
+    ? '拖曳活塞和音域條到順手的位置 · 拉音域條角落的圓點改大小，也可以拉成橫的'
+    : settings.mode === 'mic'
+      ? '對著麥克風吹氣發聲 · 點音域條選音域 · 右手按活塞'
+      : '左手按住音域條發聲 · 右手按 1 2 3 號活塞';
+  $('#keyBadge').textContent = settings.horn === 'bb' ? 'B♭ 小號' : 'C 小號';
+}
+document.querySelectorAll('input[name="mode"]').forEach((r) => r.addEventListener('change', () => setMode(r.value)));
+document.querySelectorAll('input[name="channel"]').forEach((r) => r.addEventListener('change', () => {
+  settings.channel = r.value; saveSettings(); applyAudioSettings();
+}));
+document.querySelectorAll('input[name="horn"], input[name="naming"]').forEach((r) => r.addEventListener('change', () => {
+  settings[r.name] = r.value; saveSettings(); syncControls(); update();
+}));
+for (const id of ['volume', 'reverb', 'vibrato', 'micSens']) {
+  $('#' + id).addEventListener('input', (e) => {
+    settings[id] = Number(e.target.value); $('#' + id + 'Out').textContent = settings[id];
+    saveSettings(); applyAudioSettings();
+  });
+}
+for (const id of ['valveSize', 'editSize']) {
+  $('#' + id).addEventListener('input', (e) => {
+    settings.valveScale = Number(e.target.value); saveSettings(); syncControls(); applyLayout();
+  });
+}
+$('#btnTestOut').addEventListener('click', () => preview([72, 76, 79, 84], 0.26));
+
+function closeSheets() { $('#settingsWrap').hidden = true; $('#chartWrap').hidden = true; }
+$('#btnSettings').addEventListener('click', () => { if (editing) setEditing(false); syncControls(); $('#settingsWrap').hidden = false; releaseAll(); });
+$('#btnCloseSettings').addEventListener('click', closeSheets);
+$('#btnChart').addEventListener('click', () => { if (editing) setEditing(false); buildChart(); $('#chartWrap').hidden = false; releaseAll(); });
+$('#btnCloseChart').addEventListener('click', closeSheets);
+['#settingsWrap', '#chartWrap'].forEach((id) => $(id).addEventListener('click', (e) => { if (e.target === e.currentTarget) closeSheets(); }));
+$('#btnLayout').addEventListener('click', () => setEditing(!editing));
+$('#btnDoneLayout').addEventListener('click', () => setEditing(false));
+$('#btnResetLayout').addEventListener('click', resetLayout);
+$('#btnEditFromSettings').addEventListener('click', () => { closeSheets(); setEditing(true); });
+$('#btnResetFromSettings').addEventListener('click', resetLayout);
+
+/* fingering chart */
+function fingeringFor(w) {
+  for (let p = 0; p < PARTIALS.length; p++) {
+    const off = PARTIALS[p].midi - w;
+    if (off >= 0 && off <= 6) return { p, off };
+  }
+  return null;
+}
+function buildChart() {
+  const grid = $('#chartGrid'), cur = writtenMidi();
+  grid.textContent = '';
+  for (let w = PARTIALS[0].midi - 6; w <= PARTIALS[PARTIALS.length - 1].midi; w++) {
+    const f = fingeringFor(w);
+    if (!f) continue;
+    const on = OFFSET_VALVES[f.off];
+    const b = document.createElement('button');
+    b.type = 'button'; b.className = 'cell' + (w === cur ? ' cur' : '');
+    b.setAttribute('aria-label', noteText(w) + '，活塞 ' + (on.length ? on.map((i) => i + 1).join(' ') : '全放開'));
+    b.innerHTML = '<span class="cn">' + noteHTML(w) + '</span><span class="dots">' +
+      [0, 1, 2].map((i) => '<i class="' + (on.includes(i) ? 'on' : '') + '"></i>').join('') +
+      '</span><span class="cp">第 ' + PARTIALS[f.p].n + ' 泛音</span>';
+    b.addEventListener('click', () => preview([w], 0.7));
+    grid.appendChild(b);
+  }
+  $('#chartSub').textContent = (settings.horn === 'bb' ? 'B♭ 小號記譜音' : 'C 小號') + '。點一下可以試聽；實心圓點是要按的活塞。';
+}
+
+/* ================= misc ================= */
+let toastTimer = 0;
+function toast(msg) {
+  const t = $('#toast');
+  t.textContent = msg; t.hidden = false;
+  clearTimeout(toastTimer); toastTimer = setTimeout(() => { t.hidden = true; }, 3800);
+}
+let wakeLock = null;
+function requestWakeLock() {
+  try {
+    if (navigator.wakeLock && !wakeLock) navigator.wakeLock.request('screen').then((l) => { wakeLock = l; l.addEventListener('release', () => { wakeLock = null; }); }).catch(() => {});
+  } catch (e) { /* not allowed */ }
+}
+
+$('#btnStart').addEventListener('click', async () => {
+  ensureAudio();
+  $('#startOverlay').hidden = true;
+  requestWakeLock();
+  if (settings.mode === 'mic') {
+    try { await Mic.start(ctx); startMicLoop(); }
+    catch (err) { Mic.stop(); settings.mode = 'touch'; saveSettings(); toast(micErrorText(err)); }
+  }
+  syncControls(); update();
+});
+
+if (window.ResizeObserver) new ResizeObserver(applyLayout).observe(stage);
+window.addEventListener('resize', applyLayout);
+syncControls();
+applyLayout();
+render(false);
+
+try {
+  if ('serviceWorker' in navigator && location.protocol === 'https:') navigator.serviceWorker.register('sw.js').catch(() => {});
+} catch (e) { /* not available here */ }
+
+window.PocketTrumpet = { Horn, PARTIALS, fingeringFor, freqOf };
+})();
+</script>
+<!-- page:body-end -->
+</body>
+</html>
