@@ -73,9 +73,10 @@ button:focus-visible,.seg input:focus-visible+label,input[type=range]:focus-visi
 .brand{justify-self:start;display:flex;align-items:center;gap:10px;min-width:0}
 .brand-name{font:700 18px/1 var(--f-title);letter-spacing:.08em;white-space:nowrap}
 .key{
-  font:700 13px/1 var(--f-display);color:var(--brass-hi);border:1px solid var(--line-strong);
-  border-radius:999px;padding:4px 9px 3px;letter-spacing:.02em;white-space:nowrap;
+  font:700 13px/1 var(--f-display);color:var(--brass-hi);border:1px solid var(--line-strong);background:transparent;
+  border-radius:999px;padding:6px 11px 5px;letter-spacing:.02em;white-space:nowrap;cursor:pointer;touch-action:manipulation;
 }
+.key:active{background:rgba(214,162,74,.16)}
 .readout{text-align:center;min-width:7.5em}
 .readout .note{
   font:500 40px/1 var(--f-display);color:var(--ink-dim);letter-spacing:.01em;
@@ -215,6 +216,8 @@ input[type=range]{accent-color:var(--brass);width:100%;margin:0;touch-action:pan
 .help{margin:0;font-size:12.5px;color:var(--ink-dim);line-height:1.6}
 .warn{margin:0;font-size:13px;color:var(--warn);line-height:1.6}
 .inline{display:flex;gap:10px;align-items:stretch}
+.field{display:grid;grid-template-columns:3.2em 1fr;align-items:center;gap:12px}
+.field-label{font-size:14px;color:var(--ink)}
 .inline .seg{flex:1}
 .mic-meter{position:relative;height:10px;border-radius:6px;background:rgba(0,0,0,.35);border:1px solid var(--line)}
 .mic-meter i{position:absolute;left:0;top:0;bottom:0;width:0;border-radius:inherit;background:linear-gradient(90deg,var(--brass-lo),var(--brass-hi))}
@@ -238,10 +241,10 @@ input[type=range]{accent-color:var(--brass);width:100%;margin:0;touch-action:pan
 
 /* start card */
 .start{
-  position:absolute;inset:0;z-index:30;display:flex;align-items:center;justify-content:center;padding:16px;overflow:auto;
+  position:absolute;inset:0;z-index:30;display:flex;padding:16px;overflow:auto;
   background:radial-gradient(120% 80% at 50% 20%,rgba(51,19,30,.97),rgba(20,8,12,.98));
 }
-.start-card{width:min(440px,100%);display:grid;gap:14px;text-align:left}
+.start-card{width:min(440px,100%);margin:auto;display:grid;gap:14px;text-align:left}
 .trio{display:flex;gap:10px}
 .trio span{
   width:30px;height:30px;border-radius:50%;padding:4px;
@@ -275,7 +278,10 @@ input[type=range]{accent-color:var(--brass);width:100%;margin:0;touch-action:pan
   .tool span{display:none}
   .tool{min-width:42px;padding:8px}
   .start h1{font-size:34px}
-  .start-card{gap:10px}
+  .start-card{gap:8px}
+  .start p{font-size:14px;line-height:1.6}
+  .start ul{font-size:13px;line-height:1.6}
+  .start .btn.primary{padding:11px 18px}
   .sheet-wrap{padding-top:8px}
 }
 @media (min-width:900px) and (min-height:600px){
@@ -294,7 +300,7 @@ input[type=range]{accent-color:var(--brass);width:100%;margin:0;touch-action:pan
   <header class="bar">
     <div class="brand">
       <span class="brand-name">口袋小號</span>
-      <span class="key" id="keyBadge" title="樂器調性">B♭ 小號</span>
+      <button class="key" id="keyBadge" type="button" title="點一下切換小號／短號音色">B♭ 小號</button>
     </div>
     <div class="readout" id="readout">
       <div class="note" id="noteName">C<small>5</small></div>
@@ -386,15 +392,28 @@ input[type=range]{accent-color:var(--brass);width:100%;margin:0;touch-action:pan
 
       <div class="group">
         <h3>樂器與音名</h3>
-        <div class="seg" role="radiogroup" aria-label="樂器">
-          <input type="radio" name="horn" id="hornBb" value="bb"><label for="hornBb">B♭ 小號</label>
-          <input type="radio" name="horn" id="hornC" value="c"><label for="hornC">C 小號</label>
+        <div class="field">
+          <span class="field-label" id="voiceLbl">音色</span>
+          <div class="seg" role="radiogroup" aria-labelledby="voiceLbl">
+            <input type="radio" name="voice" id="voiceTrumpet" value="trumpet"><label for="voiceTrumpet">小號</label>
+            <input type="radio" name="voice" id="voiceCornet" value="cornet"><label for="voiceCornet">短號</label>
+          </div>
         </div>
-        <div class="seg" role="radiogroup" aria-label="音名">
-          <input type="radio" name="naming" id="nameLetter" value="letter"><label for="nameLetter">C D E</label>
-          <input type="radio" name="naming" id="nameSolfege" value="solfege"><label for="nameSolfege">Do Re Mi</label>
+        <div class="field">
+          <span class="field-label" id="hornLbl">調性</span>
+          <div class="seg" role="radiogroup" aria-labelledby="hornLbl">
+            <input type="radio" name="horn" id="hornBb" value="bb"><label for="hornBb">B♭ 調</label>
+            <input type="radio" name="horn" id="hornC" value="c"><label for="hornC">C 調</label>
+          </div>
         </div>
-        <p class="help">畫面上顯示的是小號記譜音（和小號樂譜相同）。B♭ 小號實際發出的音比記譜低一個全音。</p>
+        <div class="field">
+          <span class="field-label" id="namingLbl">音名</span>
+          <div class="seg" role="radiogroup" aria-labelledby="namingLbl">
+            <input type="radio" name="naming" id="nameLetter" value="letter"><label for="nameLetter">C D E</label>
+            <input type="radio" name="naming" id="nameSolfege" value="solfege"><label for="nameSolfege">Do Re Mi</label>
+          </div>
+        </div>
+        <p class="help">短號和小號的指法、音域相同，聲音比較圓潤柔和。點標題列的樂器名稱也可以快速切換音色。畫面上顯示的是記譜音；B♭ 調的樂器實際發出的音比記譜低一個全音。</p>
       </div>
 
       <div class="group">
@@ -426,11 +445,12 @@ input[type=range]{accent-color:var(--brass);width:100%;margin:0;touch-action:pan
   <div class="start" id="startOverlay">
     <div class="start-card">
       <div class="trio" aria-hidden="true"><span></span><span></span><span></span></div>
-      <p class="eyebrow">B♭ 小號 · 手機 / iPad</p>
+      <p class="eyebrow">小號 · 短號 · 手機 / iPad</p>
       <h1>口袋小號</h1>
       <p>左手按住音域條就會發聲，右手按 1・2・3 號活塞改變音高，指法和真的小號一樣。</p>
       <ul>
         <li>「位置」可以把三個活塞和音域條拖到順手的地方。</li>
+        <li>點標題列的「B♭ 小號」可以切換成短號音色。</li>
         <li>「設定」可以改用麥克風吹氣，或切換左右聲道、只有左、只有右。</li>
         <li>電腦鍵盤：J K L 是活塞，1–6 選音域並發聲，空白鍵吹奏。</li>
       </ul>
@@ -466,9 +486,9 @@ const NAMES = {
   solfege: ['Do', 'Do♯', 'Re', 'Mi♭', 'Mi', 'Fa', 'Fa♯', 'Sol', 'Sol♯', 'La', 'Si♭', 'Si']
 };
 
-const DEFAULTS = { mode: 'touch', channel: 'stereo', volume: 80, reverb: 25, vibrato: 15, horn: 'bb', naming: 'letter', micSens: 55, valveScale: 100 };
+const DEFAULTS = { mode: 'touch', channel: 'stereo', volume: 80, reverb: 25, vibrato: 15, voice: 'trumpet', horn: 'bb', naming: 'letter', micSens: 55, valveScale: 100 };
 function sanitize(s) {
-  const enums = { mode: ['touch', 'mic'], channel: ['stereo', 'left', 'right'], horn: ['bb', 'c'], naming: ['letter', 'solfege'] };
+  const enums = { mode: ['touch', 'mic'], channel: ['stereo', 'left', 'right'], voice: ['trumpet', 'cornet'], horn: ['bb', 'c'], naming: ['letter', 'solfege'] };
   for (const k in enums) if (!enums[k].includes(s[k])) s[k] = DEFAULTS[k];
   for (const k of ['volume', 'reverb', 'vibrato', 'micSens']) { const n = Number(s[k]); s[k] = Number.isFinite(n) ? clamp(n, 0, 100) : DEFAULTS[k]; }
   const vs = Number(s.valveScale); s.valveScale = Number.isFinite(vs) ? clamp(vs, 60, 160) : DEFAULTS.valveScale;
@@ -478,6 +498,7 @@ const settings = sanitize(Object.assign({}, DEFAULTS, store.get('settings', {}))
 const saveSettings = () => store.set('settings', settings);
 
 const transpose = () => (settings.horn === 'bb' ? -2 : 0);
+const instrumentName = () => (settings.horn === 'bb' ? 'B♭ ' : 'C ') + VOICES[settings.voice].name;
 const freqOf = (m) => 440 * Math.pow(2, (m - 69) / 12);
 function noteLabel(midi) {
   return { name: NAMES[settings.naming][((midi % 12) + 12) % 12], oct: Math.floor(midi / 12) - 1 };
@@ -510,27 +531,34 @@ function makeIR(c, sec) {
   return b;
 }
 
+// Timbre presets. Trumpet: cylindrical bore, bright with an edge. Cornet: conical bore,
+// so fewer upper harmonics, a lower bell resonance, less saturation and a softer attack.
+const VOICES = {
+  trumpet: { name: '小號', rolloff: 0.8, fund: 0.75, saw: 0.16, cutBase: 1.5, cutSpan: 7, cutAdd: 2200, bellHz: 1300, bellQ: 1.1, bellDb: 4,
+             drive: 1, makeup: 0.85, scoop: 0.975, punch: 1.25, attack: 0.006, breath: 0.05 },
+  cornet:  { name: '短號', rolloff: 1.1, fund: 1.0, saw: 0.06, cutBase: 1.25, cutSpan: 4.2, cutAdd: 1100, bellHz: 900, bellQ: 0.9, bellDb: 3,
+             drive: 0.7, makeup: 0.74, scoop: 0.985, punch: 1.1, attack: 0.012, breath: 0.035 }
+};
+
 // Monophonic brass voice: harmonic-rich wave -> breath-driven lowpass -> bell resonance -> soft clip.
 // Output passes a 2x2 channel matrix so it can play on both sides, only left or only right.
 class Horn {
   constructor(ctx) {
     const c = this.ctx = ctx;
-    const N = 48, real = new Float32Array(N + 1), imag = new Float32Array(N + 1);
-    for (let n = 1; n <= N; n++) imag[n] = Math.pow(n, -0.8);
-    imag[1] *= 0.75;
-    this.oscA = c.createOscillator(); this.oscA.setPeriodicWave(c.createPeriodicWave(real, imag));
+    this.oscA = c.createOscillator();
     this.oscB = c.createOscillator(); this.oscB.type = 'sawtooth'; this.oscB.detune.value = 7;
-    const mixB = c.createGain(); mixB.gain.value = 0.16;
+    this.mixB = c.createGain();
     this.filter = c.createBiquadFilter(); this.filter.type = 'lowpass'; this.filter.Q.value = 0.8; this.filter.frequency.value = 600;
-    const bell = c.createBiquadFilter(); bell.type = 'peaking'; bell.frequency.value = 1300; bell.Q.value = 1.1; bell.gain.value = 4;
+    this.bell = c.createBiquadFilter(); this.bell.type = 'peaking';
     const hp = c.createBiquadFilter(); hp.type = 'highpass'; hp.frequency.value = 90; hp.Q.value = 0.7;
     this.amp = c.createGain(); this.amp.gain.value = 0;
+    this.drive = c.createGain();
     const shaper = c.createWaveShaper(); shaper.curve = tanhCurve(1.8); shaper.oversample = '2x';
-    const post = c.createGain(); post.gain.value = 0.85;
+    this.post = c.createGain();
     const bus = c.createGain();
     this.oscA.connect(this.filter);
-    chain(this.oscB, mixB, this.filter);
-    chain(this.filter, bell, hp, this.amp, shaper, post, bus);
+    chain(this.oscB, this.mixB, this.filter);
+    chain(this.filter, this.bell, hp, this.amp, this.drive, shaper, this.post, bus);
 
     // breath noise at the attack
     const nb = c.createBuffer(1, c.sampleRate * 2, c.sampleRate), nd = nb.getChannelData(0);
@@ -567,24 +595,39 @@ class Horn {
     merge.connect(c.destination);
 
     this.sounding = false; this.freq = 440; this.level = 0.7; this.vibDepth = 0; this.onAt = 0;
+    this.setVoice('trumpet');
     [this.oscA, this.oscB, this.noise, this.lfo].forEach((n) => n.start());
   }
+  setVoice(name) {
+    const v = this.v = VOICES[name] || VOICES.trumpet, c = this.ctx;
+    const N = 48, real = new Float32Array(N + 1), imag = new Float32Array(N + 1);
+    for (let n = 1; n <= N; n++) imag[n] = Math.pow(n, -v.rolloff);
+    imag[1] *= v.fund;
+    this.oscA.setPeriodicWave(c.createPeriodicWave(real, imag));
+    const t = c.currentTime;
+    const to = (param, val) => { hold(param, t); param.setTargetAtTime(val, t, 0.015); };
+    to(this.mixB.gain, v.saw);
+    to(this.bell.frequency, v.bellHz); to(this.bell.Q, v.bellQ); to(this.bell.gain, v.bellDb);
+    to(this.drive.gain, v.drive); to(this.post.gain, v.makeup);
+    if (this.sounding) to(this.filter.frequency, this.cutFor(this.freq, this.level));
+  }
   ampFor(l) { return 0.04 + 0.42 * Math.pow(l, 1.3); }
-  cutFor(f, l) { const p = Math.pow(l, 1.5); return Math.min(15000, f * (1.5 + 7 * p) + 2200 * p + 200); }
+  cutFor(f, l) { const v = this.v, p = Math.pow(l, 1.5); return Math.min(15000, f * (v.cutBase + v.cutSpan * p) + v.cutAdd * p + 200); }
   noteOn(freq, level) {
     const t = this.ctx.currentTime;
     this.sounding = true; this.freq = freq; this.level = level; this.onAt = t;
+    const v = this.v;
     for (const o of [this.oscA, this.oscB]) {          // lips "scoop" up to the pitch
-      hold(o.frequency, t); o.frequency.setValueAtTime(freq * 0.975, t); o.frequency.setTargetAtTime(freq, t, 0.018);
+      hold(o.frequency, t); o.frequency.setValueAtTime(freq * v.scoop, t); o.frequency.setTargetAtTime(freq, t, 0.018);
     }
     const a = this.ampFor(level), cf = this.cutFor(freq, level);
-    hold(this.amp.gain, t); this.amp.gain.setTargetAtTime(a * 1.25, t, 0.006); this.amp.gain.setTargetAtTime(a, t + 0.045, 0.06);
+    hold(this.amp.gain, t); this.amp.gain.setTargetAtTime(a * v.punch, t, v.attack); this.amp.gain.setTargetAtTime(a, t + 0.045, 0.06);
     hold(this.filter.frequency, t);
     this.filter.frequency.setValueAtTime(Math.max(freq * 1.1, 200), t);
     this.filter.frequency.setTargetAtTime(cf * 1.35, t, 0.012);
     this.filter.frequency.setTargetAtTime(cf, t + 0.05, 0.09);
     hold(this.noiseGain.gain, t);
-    this.noiseGain.gain.setTargetAtTime(0.05 * (0.4 + level), t, 0.004);
+    this.noiseGain.gain.setTargetAtTime(v.breath * (0.4 + level), t, 0.004);
     this.noiseGain.gain.setTargetAtTime(0.004 + 0.01 * level, t + 0.025, 0.05);
     hold(this.vib.gain, t); this.vib.gain.setValueAtTime(0, t); this.vib.gain.setTargetAtTime(this.vibDepth, t + 0.22, 0.22);
   }
@@ -717,6 +760,7 @@ function ensureAudio() {
 }
 function applyAudioSettings() {
   if (!horn) return;
+  horn.setVoice(settings.voice);
   horn.setChannel(settings.channel);
   horn.setVolume(settings.volume / 100);
   horn.setReverb(settings.reverb / 100);
@@ -997,7 +1041,7 @@ document.addEventListener('visibilitychange', () => {
 
 /* ================= settings UI ================= */
 function syncControls() {
-  for (const name of ['mode', 'channel', 'horn', 'naming']) {
+  for (const name of ['mode', 'channel', 'voice', 'horn', 'naming']) {
     const r = document.querySelector('input[name="' + name + '"][value="' + settings[name] + '"]');
     if (r) r.checked = true;
   }
@@ -1015,7 +1059,9 @@ function syncControls() {
     : settings.mode === 'mic'
       ? '對著麥克風吹氣發聲 · 點音域條選音域 · 右手按活塞'
       : '左手按住音域條發聲 · 右手按 1 2 3 號活塞';
-  $('#keyBadge').textContent = settings.horn === 'bb' ? 'B♭ 小號' : 'C 小號';
+  const inst = instrumentName();
+  $('#keyBadge').textContent = inst;
+  $('#keyBadge').setAttribute('aria-label', '音色：' + inst + '，點一下切換');
 }
 document.querySelectorAll('input[name="mode"]').forEach((r) => r.addEventListener('change', () => setMode(r.value)));
 document.querySelectorAll('input[name="channel"]').forEach((r) => r.addEventListener('change', () => {
@@ -1024,6 +1070,16 @@ document.querySelectorAll('input[name="channel"]').forEach((r) => r.addEventList
 document.querySelectorAll('input[name="horn"], input[name="naming"]').forEach((r) => r.addEventListener('change', () => {
   settings[r.name] = r.value; saveSettings(); syncControls(); update();
 }));
+function setVoice(voice, announce) {
+  settings.voice = voice; saveSettings(); applyAudioSettings(); syncControls();
+  if (announce) toast('音色：' + VOICES[voice].name);
+  if (horn && !horn.sounding) preview([72, 79], 0.32);       // let the player hear the new colour
+}
+document.querySelectorAll('input[name="voice"]').forEach((r) => r.addEventListener('change', () => setVoice(r.value, false)));
+$('#keyBadge').addEventListener('click', () => {
+  if (editing) return;
+  setVoice(settings.voice === 'trumpet' ? 'cornet' : 'trumpet', true);
+});
 for (const id of ['volume', 'reverb', 'vibrato', 'micSens']) {
   $('#' + id).addEventListener('input', (e) => {
     settings[id] = Number(e.target.value); $('#' + id + 'Out').textContent = settings[id];
@@ -1073,7 +1129,7 @@ function buildChart() {
     b.addEventListener('click', () => preview([w], 0.7));
     grid.appendChild(b);
   }
-  $('#chartSub').textContent = (settings.horn === 'bb' ? 'B♭ 小號記譜音' : 'C 小號') + '。點一下可以試聽；實心圓點是要按的活塞。';
+  $('#chartSub').textContent = instrumentName() + (settings.horn === 'bb' ? '記譜音' : '') + '。點一下可以試聽；實心圓點是要按的活塞。';
 }
 
 /* ================= misc ================= */
