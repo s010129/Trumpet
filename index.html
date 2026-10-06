@@ -17,7 +17,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:opsz,wght@6..96,500;6..96,700&family=Noto+Sans+TC:wght@400;500;700&display=swap">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@700&text=%E5%8F%A3%E8%A2%8B%E5%B0%8F%E8%99%9F&display=swap">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Music&text=%E2%99%AD%E2%99%AF&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Music&text=%E2%99%AD%E2%99%AF%E2%99%A9&display=swap">
 <style>
 /* Layout: full-bleed instrument. A slim readout bar sits over a velvet "case lining" stage;
    the partial strip and the three pearl valves float on it at positions the player sets. */
@@ -258,6 +258,73 @@ input[type=range]{accent-color:var(--brass);width:100%;margin:0;touch-action:pan
 .start .btn.primary{padding:14px 18px;font-size:17px;letter-spacing:.2em}
 .start small{color:var(--ink-dim);font-size:12px;line-height:1.6}
 
+/* ---------- rhythm game ---------- */
+.lane{
+  --dot:14px;--dgap:4px;--name-h:17px;--ngap:4px;--col:44px;
+  position:relative;flex:0 0 auto;overflow:hidden;touch-action:none;border-bottom:1px solid var(--line);
+  height:calc(26px + var(--name-h) + var(--ngap) + 3 * var(--dot) + 2 * var(--dgap) + 12px);
+  background:linear-gradient(180deg,rgba(0,0,0,.3),rgba(0,0,0,.12));
+}
+.lane-hud{position:absolute;left:0;right:0;top:0;height:26px;display:flex;align-items:center;gap:12px;padding:0 16px;font-size:12px;color:var(--ink-dim);letter-spacing:.04em;z-index:3}
+.hud-title{color:var(--ink);font-weight:700;white-space:nowrap;max-width:8em;overflow:hidden;text-overflow:ellipsis}
+.hud-prog{position:relative;flex:1;min-width:30px;height:3px;border-radius:2px;background:rgba(246,220,150,.12);overflow:hidden}
+.hud-prog i{position:absolute;left:0;top:0;bottom:0;width:0;background:var(--brass)}
+.hud-stat{white-space:nowrap;font-variant-numeric:tabular-nums}
+.hud-stat b{color:var(--brass-hi);font-weight:700}
+.hud-btn{padding:3px 10px;border-radius:8px;border:1px solid var(--line-strong);background:transparent;color:var(--ink);font-size:12px;cursor:pointer;touch-action:manipulation}
+.lane-track{position:absolute;left:0;right:0;top:26px;bottom:0}
+.hitline{position:absolute;top:-2px;bottom:6px;left:64px;width:3px;margin-left:-1.5px;border-radius:2px;z-index:2;background:linear-gradient(180deg,var(--brass-hi),var(--brass));box-shadow:0 0 14px rgba(246,220,150,.55)}
+.gbar{position:absolute;left:0;top:calc(var(--name-h) + var(--ngap) - 3px);width:1px;height:calc(3 * var(--dot) + 2 * var(--dgap) + 6px);background:rgba(246,220,150,.16)}
+.gnote{position:absolute;left:0;top:0;z-index:1;width:var(--col);display:flex;flex-direction:column;align-items:center;gap:var(--ngap);will-change:transform}
+.gnote.off{display:none}
+.gn-head{position:relative;height:var(--name-h);display:flex;align-items:center;white-space:nowrap;font:500 15px/1 var(--f-display);color:var(--ink)}
+.gn-head small{font-size:.6em;opacity:.75;margin-left:.04em}
+.gn-p{position:absolute;left:100%;top:-3px;margin-left:2px;min-width:13px;height:13px;padding:0 3px;border-radius:7px;background:var(--brass);color:var(--ink-on-brass);font:700 9px/13px var(--f-ui);text-align:center}
+.lane.easy .gn-p{display:none}
+.gn-dots{display:flex;flex-direction:column;gap:var(--dgap)}
+.gn-dots i{display:block;width:var(--dot);height:var(--dot);border-radius:50%;border:2px solid rgba(214,162,74,.55);background:rgba(20,8,12,.6)}
+.gn-dots i.on{background:var(--brass-hi);border-color:var(--brass-hi);box-shadow:0 0 8px rgba(246,220,150,.5)}
+.gn-tail{position:absolute;left:50%;top:calc(var(--name-h) + var(--ngap));z-index:-1;height:calc(3 * var(--dot) + 2 * var(--dgap));border-radius:0 8px 8px 0;background:linear-gradient(90deg,rgba(214,162,74,.3),rgba(214,162,74,.08))}
+.gnote.now .gn-dots i.on{box-shadow:0 0 16px rgba(246,220,150,.95)}
+.gnote.perfect .gn-head{color:var(--brass-hi)}
+.gnote.miss{opacity:.4}
+.gnote.miss .gn-dots i.on{background:var(--warn);border-color:var(--warn);box-shadow:none}
+.judge{position:absolute;left:4px;top:calc(var(--name-h) + var(--ngap) + var(--dot) - 4px);z-index:4;width:50px;padding:4px 0;border-radius:8px;background:rgba(20,8,12,.88);text-align:center;white-space:nowrap;pointer-events:none;opacity:0;font:700 13px/1 var(--f-ui);letter-spacing:.08em}
+.judge.show{animation:judge .65s ease-out}
+.judge.perfect{color:var(--brass-hi)}
+.judge.good{color:var(--ink)}
+.judge.miss{color:var(--warn)}
+@keyframes judge{0%{opacity:0;transform:translateY(6px)}15%{opacity:1;transform:none}70%{opacity:1}100%{opacity:0;transform:translateY(-6px)}}
+.countin{position:absolute;inset:0;z-index:4;display:flex;align-items:center;justify-content:center;pointer-events:none;font:700 40px/1 var(--f-display);color:var(--brass-hi);text-shadow:0 0 20px rgba(246,220,150,.5)}
+.lane-idle{position:absolute;inset:0;z-index:5;display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:10px 14px;padding:8px 16px;text-align:center;font-size:13px;color:var(--ink-dim)}
+.zone.target{border-color:var(--brass-hi);box-shadow:inset 0 0 0 2px var(--brass-hi),0 0 18px rgba(246,220,150,.3)}
+.zone.target.on{box-shadow:0 0 26px rgba(246,220,150,.45)}
+
+.song-list{display:grid;gap:10px;padding:14px 0 4px}
+.sheet.wide{width:min(880px,100%)}
+@media (min-width:700px){
+  .songs-body{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:24px;align-items:start}
+  .songs-body .group{border-bottom:0}
+  .songs-body .song-list{padding-top:16px}
+}
+.song{
+  display:grid;gap:4px;padding:14px 16px;border-radius:16px;text-align:left;color:var(--ink);cursor:pointer;touch-action:manipulation;
+  border:1px solid var(--line-strong);background:linear-gradient(160deg,rgba(246,220,150,.08),rgba(0,0,0,.15));
+}
+.song:active{background:rgba(214,162,74,.18)}
+.song-title{font:700 18px/1.3 var(--f-ui);letter-spacing:.06em}
+.song-meta{font-size:12.5px;color:var(--ink-dim)}
+.song-best{font-size:12.5px;color:var(--brass)}
+.result{display:grid;gap:14px;padding:16px 0 4px}
+.result-acc{display:flex;align-items:baseline;flex-wrap:wrap;gap:6px 14px}
+.result-acc .pct{font:700 52px/1 var(--f-display);color:var(--brass-hi);font-variant-numeric:tabular-nums}
+.stars{font-size:24px;letter-spacing:.12em;color:var(--brass)}
+.result-new{margin:0;color:var(--brass-hi);font-weight:700;letter-spacing:.1em}
+.result-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(88px,1fr));gap:8px;margin:0}
+.result-grid div{padding:10px 12px;border-radius:12px;background:rgba(0,0,0,.25);border:1px solid var(--line)}
+.result-grid dt{font-size:12px;color:var(--ink-dim)}
+.result-grid dd{margin:2px 0 0;font:700 20px/1.2 var(--f-ui);font-variant-numeric:tabular-nums}
+
 .toast{
   position:absolute;left:50%;top:76px;z-index:40;transform:translateX(-50%);max-width:min(440px,calc(100% - 32px));
   padding:10px 14px;border-radius:12px;background:var(--panel);border:1px solid var(--line-strong);
@@ -269,8 +336,13 @@ input[type=range]{accent-color:var(--brass);width:100%;margin:0;touch-action:pan
   .editbar{gap:10px}
   .brand-name{display:none}
   .tool span{display:none}
-  .tool{min-width:42px;padding:9px}
-  .bar{gap:8px}
+  .tool{min-width:38px;padding:8px 7px}
+  .actions{gap:5px}
+  .bar{gap:6px;padding-inline:12px}
+  .readout{min-width:0}
+  .readout .cl{display:none}
+  .lane-hud{gap:8px;padding:0 12px}
+  .hud-title{max-width:5em}
 }
 @media (max-height:440px){
   .bar{min-height:54px;padding-block:3px}
@@ -283,10 +355,18 @@ input[type=range]{accent-color:var(--brass);width:100%;margin:0;touch-action:pan
   .start ul{font-size:13px;line-height:1.6}
   .start .btn.primary{padding:11px 18px}
   .sheet-wrap{padding-top:8px}
+  .song{padding:9px 14px;gap:1px}
+  .song-title{font-size:16px}
+  .song-list{gap:8px}
+  .songs-body .song-list{padding-top:12px}
 }
 @media (min-width:900px) and (min-height:600px){
   .readout .note{font-size:48px}
   .bar{min-height:80px}
+  .lane{--dot:20px;--dgap:6px;--name-h:22px;--ngap:6px;--col:56px}
+  .gn-head{font-size:20px}
+  .lane-hud{font-size:13px}
+  .judge{font-size:16px}
 }
 @media (prefers-reduced-motion:reduce){
   *{transition:none!important}
@@ -304,9 +384,13 @@ input[type=range]{accent-color:var(--brass);width:100%;margin:0;touch-action:pan
     </div>
     <div class="readout" id="readout">
       <div class="note" id="noteName">C<small>5</small></div>
-      <div class="concert" id="noteConcert">實際音 B♭4 · 466 Hz</div>
+      <div class="concert" id="noteConcert"><span class="cl">實際音 </span>B♭4 · 466 Hz</div>
     </div>
     <nav class="actions" aria-label="工具">
+      <button class="tool" id="btnGame" type="button" aria-label="音遊模式" aria-pressed="false">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 18V5l11-2v13"/><circle cx="6.5" cy="18" r="2.5"/><circle cx="17.5" cy="16" r="2.5"/></svg>
+        <span>音遊</span>
+      </button>
       <button class="tool" id="btnChart" type="button" aria-label="指法表">
         <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="5" cy="12" r="3"/><circle cx="12" cy="12" r="3" fill="currentColor"/><circle cx="19" cy="12" r="3"/></svg>
         <span>指法</span>
@@ -330,6 +414,26 @@ input[type=range]{accent-color:var(--brass);width:100%;margin:0;touch-action:pan
       </div>
     </div>
   </header>
+
+  <section class="lane" id="lane" hidden aria-label="音遊譜面">
+    <div class="lane-hud" id="laneHud" hidden>
+      <span class="hud-title" id="hudTitle"></span>
+      <span class="hud-prog" aria-hidden="true"><i id="hudProg"></i></span>
+      <span class="hud-stat"><b id="hudScore">0</b> 分</span>
+      <span class="hud-stat" id="hudCombo"></span>
+      <button class="hud-btn" id="btnGameStop" type="button">結束</button>
+    </div>
+    <div class="lane-track" id="laneTrack">
+      <div class="hitline" id="hitLine"></div>
+      <div class="judge" id="judge" aria-live="polite"></div>
+      <div class="countin" id="countIn" hidden></div>
+    </div>
+    <div class="lane-idle" id="laneIdle">
+      <span>音符從右邊過來，碰到金線時照圓點按活塞</span>
+      <button class="btn primary" id="btnPickSong" type="button">選歌</button>
+      <button class="btn" id="btnLeaveGame" type="button">離開音遊</button>
+    </div>
+  </section>
 
   <main class="stage" id="stage">
     <div class="strip" id="strip" data-ctl="strip" role="group" aria-label="音域條（泛音）">
@@ -429,6 +533,72 @@ input[type=range]{accent-color:var(--brass);width:100%;margin:0;touch-action:pan
     </section>
   </div>
 
+  <div class="sheet-wrap" id="songsWrap" hidden>
+    <section class="sheet wide" role="dialog" aria-modal="true" aria-labelledby="songsTitle">
+      <div class="sheet-head">
+        <div>
+          <h2 id="songsTitle">音遊模式</h2>
+          <p>每個音符是直排的三個圓點，亮的就是要按的活塞（上到下是 1、2、3）。</p>
+        </div>
+        <button class="btn" id="btnCloseSongs" type="button">關閉</button>
+      </div>
+      <div class="songs-body">
+      <div class="group">
+        <div class="field">
+          <span class="field-label" id="diffLbl">難度</span>
+          <div class="seg" role="radiogroup" aria-labelledby="diffLbl">
+            <input type="radio" name="gameDiff" id="diffEasy" value="easy"><label for="diffEasy">簡單</label>
+            <input type="radio" name="gameDiff" id="diffStd" value="standard"><label for="diffStd">標準</label>
+          </div>
+        </div>
+        <div class="field">
+          <span class="field-label" id="speedLbl">速度</span>
+          <div class="seg" role="radiogroup" aria-labelledby="speedLbl">
+            <input type="radio" name="gameSpeed" id="speedSlow" value="0.75"><label for="speedSlow">慢速</label>
+            <input type="radio" name="gameSpeed" id="speedNormal" value="1"><label for="speedNormal">原速</label>
+          </div>
+        </div>
+        <div class="field">
+          <span class="field-label" id="clickLbl">節拍器</span>
+          <div class="seg" role="radiogroup" aria-labelledby="clickLbl">
+            <input type="radio" name="gameClick" id="clickOn" value="on"><label for="clickOn">開</label>
+            <input type="radio" name="gameClick" id="clickOff" value="off"><label for="clickOff">關</label>
+          </div>
+        </div>
+        <p class="help" id="diffHelp"></p>
+      </div>
+      <div class="song-list" id="songList"></div>
+      </div>
+    </section>
+  </div>
+
+  <div class="sheet-wrap" id="resultWrap" hidden>
+    <section class="sheet" role="dialog" aria-modal="true" aria-labelledby="resultTitle">
+      <div class="sheet-head">
+        <div>
+          <h2 id="resultTitle"></h2>
+          <p id="resultSub"></p>
+        </div>
+      </div>
+      <div class="result">
+        <div class="result-acc"><span class="pct" id="resultAcc"></span><span class="stars" id="resultStars"></span></div>
+        <p class="result-new" id="resultNew" hidden>新紀錄！</p>
+        <dl class="result-grid">
+          <div><dt>完美</dt><dd id="rPerfect"></dd></div>
+          <div><dt>不錯</dt><dd id="rGood"></dd></div>
+          <div><dt>失誤</dt><dd id="rMiss"></dd></div>
+          <div><dt>最高連擊</dt><dd id="rCombo"></dd></div>
+          <div><dt>分數</dt><dd id="rScore"></dd></div>
+        </dl>
+        <div class="btn-row">
+          <button class="btn primary" id="btnRetry" type="button">再玩一次</button>
+          <button class="btn" id="btnOtherSong" type="button">選其他歌</button>
+          <button class="btn" id="btnResultLeave" type="button">離開音遊</button>
+        </div>
+      </div>
+    </section>
+  </div>
+
   <div class="sheet-wrap" id="chartWrap" hidden>
     <section class="sheet" role="dialog" aria-modal="true" aria-labelledby="chartTitle">
       <div class="sheet-head">
@@ -449,7 +619,7 @@ input[type=range]{accent-color:var(--brass);width:100%;margin:0;touch-action:pan
       <h1>口袋小號</h1>
       <p>左手按住音域條就會發聲，右手按 1・2・3 號活塞改變音高，指法和真的小號一樣。</p>
       <ul>
-        <li>「位置」可以把三個活塞和音域條拖到順手的地方。</li>
+        <li>「位置」可以拖曳按鍵；「音遊」可以跟著圓點練三首經典曲目。</li>
         <li>點標題列的「B♭ 小號」可以切換成短號音色。</li>
         <li>「設定」可以改用麥克風吹氣，或切換左右聲道、只有左、只有右。</li>
         <li>電腦鍵盤：J K L 是活塞，1–6 選音域並發聲，空白鍵吹奏。</li>
@@ -486,12 +656,15 @@ const NAMES = {
   solfege: ['Do', 'Do♯', 'Re', 'Mi♭', 'Mi', 'Fa', 'Fa♯', 'Sol', 'Sol♯', 'La', 'Si♭', 'Si']
 };
 
-const DEFAULTS = { mode: 'touch', channel: 'stereo', volume: 80, reverb: 25, vibrato: 15, voice: 'trumpet', horn: 'bb', naming: 'letter', micSens: 55, valveScale: 100 };
+const DEFAULTS = { mode: 'touch', channel: 'stereo', volume: 80, reverb: 25, vibrato: 15, voice: 'trumpet', horn: 'bb', naming: 'letter', micSens: 55, valveScale: 100,
+  gameDiff: 'easy', gameSpeed: 1, gameClick: true };
 function sanitize(s) {
-  const enums = { mode: ['touch', 'mic'], channel: ['stereo', 'left', 'right'], voice: ['trumpet', 'cornet'], horn: ['bb', 'c'], naming: ['letter', 'solfege'] };
+  const enums = { mode: ['touch', 'mic'], channel: ['stereo', 'left', 'right'], voice: ['trumpet', 'cornet'], horn: ['bb', 'c'], naming: ['letter', 'solfege'], gameDiff: ['easy', 'standard'] };
   for (const k in enums) if (!enums[k].includes(s[k])) s[k] = DEFAULTS[k];
   for (const k of ['volume', 'reverb', 'vibrato', 'micSens']) { const n = Number(s[k]); s[k] = Number.isFinite(n) ? clamp(n, 0, 100) : DEFAULTS[k]; }
   const vs = Number(s.valveScale); s.valveScale = Number.isFinite(vs) ? clamp(vs, 60, 160) : DEFAULTS.valveScale;
+  s.gameSpeed = Number(s.gameSpeed) === 0.75 ? 0.75 : 1;
+  if (typeof s.gameClick !== 'boolean') s.gameClick = true;
   return s;
 }
 const settings = sanitize(Object.assign({}, DEFAULTS, store.get('settings', {})));
@@ -655,6 +828,14 @@ class Horn {
     hold(this.noiseGain.gain, t); this.noiseGain.gain.setTargetAtTime(0, t, 0.02);
     hold(this.filter.frequency, t); this.filter.frequency.setTargetAtTime(Math.max(this.freq, 200), t, 0.05);
   }
+  click(when, strong, vol) {
+    const c = this.ctx, o = c.createOscillator(), g = c.createGain();
+    o.type = 'triangle'; o.frequency.value = strong ? 1760 : 1320;
+    g.gain.setValueAtTime(0.0001, when);
+    g.gain.exponentialRampToValueAtTime((strong ? 0.5 : 0.32) * vol, when + 0.003);
+    g.gain.exponentialRampToValueAtTime(0.0001, when + 0.06);
+    o.connect(g); g.connect(this.master); o.start(when); o.stop(when + 0.08);
+  }
   setChannel(mode) {
     const m = { stereo: [1, 0, 0, 1], left: [0.5, 0.5, 0, 0], right: [0, 0, 0.5, 0.5] }[mode] || [1, 0, 0, 1];
     const t = this.ctx.currentTime;
@@ -723,20 +904,26 @@ let ctx = null, horn = null, editing = false, previewing = false, previewTimer =
 const valveDown = (i) => ctl.valves[i].size > 0 || ctl.keyValves[i];
 function valveOffset() { let s = 0; for (let i = 0; i < 3; i++) if (valveDown(i)) s += VALVE_STEPS[i]; return s; }
 const writtenMidi = () => PARTIALS[ctl.partial].midi - valveOffset();
+const easyAuto = () => game.playing && game.diff === 'easy';   // easy game mode blows and picks the partial for you
 function wantsSound() {
   if (editing || !horn) return false;
+  if (easyAuto()) return game.blow;
   if (ctl.blowKeys.size > 0) return true;
   return settings.mode === 'mic' ? ctl.breathOn : ctl.strip.size > 0;
 }
-const playLevel = () => (settings.mode === 'mic' && ctl.breathOn ? 0.15 + 0.85 * ctl.breath : 0.72);
+const playLevel = () => (settings.mode === 'mic' && ctl.breathOn && !easyAuto() ? 0.15 + 0.85 * ctl.breath : 0.72);
 
 function update() {
   const want = wantsSound();
+  ctl.soundingNow = want;
   if (horn) {
     if (want && previewing) stopPreview(false);
     if (!previewing) {
       const f = freqOf(writtenMidi() + transpose());
-      if (want && !horn.sounding) horn.noteOn(f, playLevel());
+      if (want && !horn.sounding) {
+        horn.noteOn(f, playLevel());
+        if (game.playing) game.onsets.push(ctx.currentTime - game.t0);
+      }
       else if (!want && horn.sounding) horn.noteOff();
       else if (want && Math.abs(f - horn.freq) > 0.01) horn.glide(f);
     }
@@ -767,6 +954,7 @@ function applyAudioSettings() {
   horn.setVibrato((settings.vibrato / 100) * 32);
 }
 function preview(list, step) {
+  if (game.playing) return;
   ensureAudio();
   if (horn.sounding && !previewing) return;
   clearTimeout(previewTimer);
@@ -858,22 +1046,22 @@ function render(sounding) {
   $('#noteName').innerHTML = noteHTML(w);
   $('#readout').classList.toggle('live', sounding);
   const cm = w + transpose(), hz = Math.round(freqOf(cm));
-  $('#noteConcert').textContent = '實際音 ' + noteText(cm) + ' · ' + hz + ' Hz';
+  $('#noteConcert').innerHTML = '<span class="cl">實際音 </span>' + noteText(cm) + ' · ' + hz + ' Hz';
   if (sounding && !hintGone) { hintGone = true; $('#hint').classList.add('gone'); }
 }
 
 /* ================= layout ================= */
-function defaultLayout(land) {
-  return land
-    ? { strip: { x: 0.03, y: 0.06, w: 0.17, h: 0.88 }, v0: { x: 0.55, y: 0.55 }, v1: { x: 0.705, y: 0.55 }, v2: { x: 0.86, y: 0.55 } }
-    : { strip: { x: 0.05, y: 0.04, w: 0.3, h: 0.9 }, v0: { x: 0.72, y: 0.27 }, v1: { x: 0.72, y: 0.5 }, v2: { x: 0.72, y: 0.73 } };
+function defaultLayout(key) {
+  if (key === 'land-g') return { strip: { x: 0.02, y: 0.06, w: 0.5, h: 0.88 }, v0: { x: 0.64, y: 0.5 }, v1: { x: 0.78, y: 0.5 }, v2: { x: 0.92, y: 0.5 } };
+  if (key.startsWith('port')) return { strip: { x: 0.05, y: 0.04, w: 0.3, h: 0.9 }, v0: { x: 0.72, y: 0.27 }, v1: { x: 0.72, y: 0.5 }, v2: { x: 0.72, y: 0.73 } };
+  return { strip: { x: 0.03, y: 0.06, w: 0.17, h: 0.88 }, v0: { x: 0.55, y: 0.55 }, v1: { x: 0.705, y: 0.55 }, v2: { x: 0.86, y: 0.55 } };
 }
 const layouts = store.get('layouts', {});
 let layoutKey = '';
 function currentLayout() {
   const L = layouts[layoutKey];
   const ok = L && L.strip && ['v0', 'v1', 'v2'].every((k) => L[k] && Number.isFinite(L[k].x) && Number.isFinite(L[k].y));
-  if (!ok) layouts[layoutKey] = defaultLayout(layoutKey === 'land');
+  if (!ok) layouts[layoutKey] = defaultLayout(layoutKey);
   return layouts[layoutKey];
 }
 function valveSize() {
@@ -883,7 +1071,7 @@ function valveSize() {
 function applyLayout() {
   const W = stage.clientWidth, H = stage.clientHeight;
   if (!W || !H) return;
-  layoutKey = W >= H ? 'land' : 'port';
+  layoutKey = (W >= H ? 'land' : 'port') + (game.mode ? '-g' : '');
   const L = currentLayout(), size = valveSize(), m = 6;
   valveEls.forEach((el, i) => {
     const p = L['v' + i];
@@ -897,6 +1085,7 @@ function applyLayout() {
   const x = clamp(s.x * W, m, W - w - m), y = clamp(s.y * H, m, H - h - m);
   Object.assign(strip.style, { left: x + 'px', top: y + 'px', width: w + 'px', height: h + 'px' });
   strip.classList.toggle('horizontal', w > h);
+  if (game.playing) laneMetrics();
 }
 function saveLayouts() { store.set('layouts', layouts); }
 
@@ -960,7 +1149,7 @@ function zoneAt(e) {
   const f = r.width > r.height ? (e.clientX - r.left) / r.width : 1 - (e.clientY - r.top) / r.height;
   return clamp(Math.floor(f * PARTIALS.length), 0, PARTIALS.length - 1);
 }
-function partialFromStrip() { if (ctl.strip.size) ctl.partial = [...ctl.strip.values()].pop(); }
+function partialFromStrip() { if (ctl.strip.size && !easyAuto()) ctl.partial = [...ctl.strip.values()].pop(); }
 function wake() { if (ctx && ctx.state !== 'running') ctx.resume().catch(() => {}); }
 
 strip.addEventListener('pointerdown', (e) => {
@@ -1007,10 +1196,11 @@ stage.addEventListener('contextmenu', (e) => e.preventDefault());
 
 const KEY_VALVE = { KeyJ: 0, KeyK: 1, KeyL: 2 };
 document.addEventListener('keydown', (e) => {
-  if (!horn || editing || !$('#settingsWrap').hidden || !$('#chartWrap').hidden) {
+  if (!horn || editing || anySheetOpen()) {
     if (e.key === 'Escape') closeSheets();
     return;
   }
+  if (e.key === 'Escape' && game.playing) { stopSong(); return; }
   if (e.metaKey || e.ctrlKey || e.altKey) return;
   if (e.code in KEY_VALVE) { e.preventDefault(); if (!e.repeat) { ctl.keyValves[KEY_VALVE[e.code]] = true; update(); } return; }
   const dm = /^Digit([1-6])$/.exec(e.code);
@@ -1035,14 +1225,15 @@ function releaseAll() {
 }
 window.addEventListener('blur', releaseAll);
 document.addEventListener('visibilitychange', () => {
-  if (document.hidden) releaseAll();
+  if (document.hidden) { stopSong(); releaseAll(); }
   else { wake(); requestWakeLock(); }
 });
 
 /* ================= settings UI ================= */
 function syncControls() {
-  for (const name of ['mode', 'channel', 'voice', 'horn', 'naming']) {
-    const r = document.querySelector('input[name="' + name + '"][value="' + settings[name] + '"]');
+  const radioValue = { gameSpeed: String(settings.gameSpeed), gameClick: settings.gameClick ? 'on' : 'off' };
+  for (const name of ['mode', 'channel', 'voice', 'horn', 'naming', 'gameDiff', 'gameSpeed', 'gameClick']) {
+    const r = document.querySelector('input[name="' + name + '"][value="' + (radioValue[name] || settings[name]) + '"]');
     if (r) r.checked = true;
   }
   for (const id of ['volume', 'reverb', 'vibrato', 'micSens']) { $('#' + id).value = settings[id]; $('#' + id + 'Out').textContent = settings[id]; }
@@ -1054,6 +1245,7 @@ function syncControls() {
   $('#modeHelp').textContent = settings.mode === 'mic'
     ? '對著手機底部的麥克風吹氣就會發聲，吹越用力越大聲、越亮。音域條改成用點的選擇音域。建議戴有線耳機，避免喇叭聲音被麥克風收進去；iPhone 搭配藍牙耳機時，系統可能改成單聲道。'
     : '按住音域條就發聲，放開就停，像用舌頭吐音。手指在音域條上滑動可以換音域。';
+  $('#hint').hidden = game.mode && !editing;
   $('#hint').textContent = editing
     ? '拖曳活塞和音域條到順手的位置 · 拉音域條角落的圓點改大小，也可以拉成橫的'
     : settings.mode === 'mic'
@@ -1073,7 +1265,7 @@ document.querySelectorAll('input[name="horn"], input[name="naming"]').forEach((r
 function setVoice(voice, announce) {
   settings.voice = voice; saveSettings(); applyAudioSettings(); syncControls();
   if (announce) toast('音色：' + VOICES[voice].name);
-  if (horn && !horn.sounding) preview([72, 79], 0.32);       // let the player hear the new colour
+  if (horn && !horn.sounding && !game.playing) preview([72, 79], 0.32);       // let the player hear the new colour
 }
 document.querySelectorAll('input[name="voice"]').forEach((r) => r.addEventListener('change', () => setVoice(r.value, false)));
 $('#keyBadge').addEventListener('click', () => {
@@ -1093,13 +1285,15 @@ for (const id of ['valveSize', 'editSize']) {
 }
 $('#btnTestOut').addEventListener('click', () => preview([72, 76, 79, 84], 0.26));
 
-function closeSheets() { $('#settingsWrap').hidden = true; $('#chartWrap').hidden = true; }
-$('#btnSettings').addEventListener('click', () => { if (editing) setEditing(false); syncControls(); $('#settingsWrap').hidden = false; releaseAll(); });
+const SHEETS = ['#settingsWrap', '#chartWrap', '#songsWrap', '#resultWrap'];
+function closeSheets() { SHEETS.forEach((id) => { $(id).hidden = true; }); }
+const anySheetOpen = () => SHEETS.some((id) => !$(id).hidden);
+$('#btnSettings').addEventListener('click', () => { stopSong(); if (editing) setEditing(false); syncControls(); $('#settingsWrap').hidden = false; releaseAll(); });
 $('#btnCloseSettings').addEventListener('click', closeSheets);
-$('#btnChart').addEventListener('click', () => { if (editing) setEditing(false); buildChart(); $('#chartWrap').hidden = false; releaseAll(); });
+$('#btnChart').addEventListener('click', () => { stopSong(); if (editing) setEditing(false); buildChart(); $('#chartWrap').hidden = false; releaseAll(); });
 $('#btnCloseChart').addEventListener('click', closeSheets);
-['#settingsWrap', '#chartWrap'].forEach((id) => $(id).addEventListener('click', (e) => { if (e.target === e.currentTarget) closeSheets(); }));
-$('#btnLayout').addEventListener('click', () => setEditing(!editing));
+SHEETS.forEach((id) => $(id).addEventListener('click', (e) => { if (e.target === e.currentTarget) closeSheets(); }));
+$('#btnLayout').addEventListener('click', () => { stopSong(); setEditing(!editing); });
 $('#btnDoneLayout').addEventListener('click', () => setEditing(false));
 $('#btnResetLayout').addEventListener('click', resetLayout);
 $('#btnEditFromSettings').addEventListener('click', () => { closeSheets(); setEditing(true); });
@@ -1131,6 +1325,282 @@ function buildChart() {
   }
   $('#chartSub').textContent = instrumentName() + (settings.horn === 'bb' ? '記譜音' : '') + '。點一下可以試聽；實心圓點是要按的活塞。';
 }
+
+/* ================= rhythm game ================= */
+// Songs are written pitch for a B♭ instrument. Token = note[:beats]; r = rest; | = bar line (ignored).
+const NOTE_BASE = { C: 0, D: 2, E: 4, F: 5, G: 7, A: 9, B: 11 };
+function parseSong(src) {
+  const notes = []; let beat = 0;
+  for (const tok of src.trim().split(/\s+/)) {
+    if (tok === '|') continue;
+    const [name, len] = tok.split(':');
+    const d = len ? Number(len) : 1;
+    if (name !== 'r') {
+      const m = /^([A-G])([#b]?)(\d)$/.exec(name);
+      notes.push({ b: beat, d, w: (Number(m[3]) + 1) * 12 + NOTE_BASE[m[1]] + (m[2] === '#' ? 1 : m[2] === 'b' ? -1 : 0) });
+    }
+    beat += d;
+  }
+  return { notes, beats: beat };
+}
+const SONGS = [
+  { id: 'twinkle', title: '小星星', origin: '法國民謠', bpm: 100, src: `
+    C4 C4 G4 G4 | A4 A4 G4:2 | F4 F4 E4 E4 | D4 D4 C4:2 |
+    G4 G4 F4 F4 | E4 E4 D4:2 | G4 G4 F4 F4 | E4 E4 D4:2 |
+    C4 C4 G4 G4 | A4 A4 G4:2 | F4 F4 E4 E4 | D4 D4 C4:2` },
+  { id: 'ode', title: '歡樂頌', origin: '貝多芬《第九號交響曲》', bpm: 108, src: `
+    E4 E4 F4 G4 | G4 F4 E4 D4 | C4 C4 D4 E4 | E4:1.5 D4:.5 D4:2 |
+    E4 E4 F4 G4 | G4 F4 E4 D4 | C4 C4 D4 E4 | D4:1.5 C4:.5 C4:2 |
+    D4 D4 E4 C4 | D4 E4:.5 F4:.5 E4 C4 | D4 E4:.5 F4:.5 E4 D4 | C4 D4 G3:2 |
+    E4 E4 F4 G4 | G4 F4 E4 D4 | C4 C4 D4 E4 | D4:1.5 C4:.5 C4:2` },
+  { id: 'saints', title: '聖者進行曲', origin: '美國傳統歌曲', bpm: 120, src: `
+    r C4 E4 F4 | G4:4 | r C4 E4 F4 | G4:4 | r C4 E4 F4 | G4:2 E4:2 | C4:2 E4:2 | D4:4 |
+    r E4 E4 D4 | C4:3 C4 | E4:2 G4 G4 | F4:4 | r C4 E4 F4 | G4:2 E4:2 | C4:2 D4:2 | C4:4` }
+];
+SONGS.forEach((s) => Object.assign(s, parseSong(s.src)));
+
+const game = {
+  mode: false, playing: false, song: null, diff: 'easy', speed: 1, notes: [], bars: [],
+  t0: 0, spb: 0.5, end: 0, beats: 0, nextClick: -4, cur: 0, judgeFrom: 0, viewFrom: 0,
+  pps: 160, hitX: 64, col: 44, blow: false, onsets: [], targetZone: -1, raf: 0,
+  perfect: 0, good: 0, miss: 0, combo: 0, maxCombo: 0, score: 0
+};
+const lane = $('#lane'), laneTrack = $('#laneTrack');
+const bests = store.get('best', {});
+const bestKey = (id, diff, speed) => id + '|' + diff + '|' + speed;
+const JUDGE_TEXT = { perfect: '完美', good: '不錯', miss: '失誤' };
+const starText = (n) => '★'.repeat(n) + '☆'.repeat(3 - n);
+
+function setGameMode(on) {
+  if (!on) stopSong();
+  if (editing) setEditing(false);
+  game.mode = on;
+  lane.hidden = !on;
+  $('#btnGame').setAttribute('aria-pressed', on ? 'true' : 'false');
+  closeSheets();
+  setTargetZone(-1);
+  showLaneIdle();
+  syncControls();
+  applyLayout();
+  if (on) openSongs();
+}
+function openSongs() {
+  stopSong();
+  syncControls();
+  buildSongList();
+  closeSheets();
+  $('#songsWrap').hidden = false;
+  releaseAll();
+}
+function buildSongList() {
+  const list = $('#songList');
+  list.textContent = '';
+  for (const song of SONGS) {
+    const ws = song.notes.map((n) => n.w);
+    const best = bests[bestKey(song.id, settings.gameDiff, settings.gameSpeed)];
+    const b = document.createElement('button');
+    b.type = 'button'; b.className = 'song';
+    b.innerHTML = '<span class="song-title">' + song.title + '</span>' +
+      '<span class="song-meta">' + song.origin + ' · ♩=' + song.bpm + ' · ' + noteText(Math.min(...ws)) + '–' + noteText(Math.max(...ws)) + ' · ' + song.notes.length + ' 個音</span>' +
+      '<span class="song-best">' + (best ? '最佳 ' + best.acc + '% ' + starText(best.stars) + ' · ' + best.score + ' 分' : '還沒玩過') + '</span>';
+    b.addEventListener('click', () => startSong(song));
+    list.appendChild(b);
+  }
+  $('#diffHelp').textContent = settings.gameDiff === 'easy'
+    ? '簡單：音域和吹氣都自動，只要看圓點按活塞。音符碰到金線時會自動發聲，按錯就會聽到錯的音。'
+    : '標準：左手按住亮起的音域格發聲（麥克風模式就吹氣），右手按活塞。同一個音連續出現時，要放開再按（吐音）才算完美。';
+}
+function showLaneIdle() { $('#laneHud').hidden = true; $('#laneIdle').hidden = false; $('#countIn').hidden = true; }
+function setTargetZone(z) {
+  if (z === game.targetZone) return;
+  game.targetZone = z;
+  zoneEls.forEach((el, i) => el.classList.toggle('target', i === z));
+}
+function laneMetrics() {
+  const W = laneTrack.clientWidth || 1;
+  game.col = parseFloat(getComputedStyle(lane).getPropertyValue('--col')) || 44;
+  game.hitX = Math.round(clamp(W * 0.14, 58, 130));
+  game.pps = clamp((W - game.hitX) / 2.8, 150, 320);
+  $('#hitLine').style.left = game.hitX + 'px';
+  $('#judge').style.width = (game.hitX - 10) + 'px';
+  for (const n of game.notes) n.tail.style.width = Math.max(0, n.dur * game.pps - game.col / 2 - 4) + 'px';
+}
+function buildLane() {
+  laneTrack.querySelectorAll('.gnote, .gbar').forEach((el) => el.remove());
+  lane.classList.toggle('easy', game.diff === 'easy');
+  for (const n of game.notes) {
+    const l = noteLabel(n.w), el = document.createElement('div');
+    el.className = 'gnote off';
+    el.innerHTML = '<span class="gn-tail"></span><span class="gn-head">' + l.name + '<small>' + l.oct + '</small><span class="gn-p">' + PARTIALS[n.p].n + '</span></span>' +
+      '<span class="gn-dots">' + [0, 1, 2].map((i) => (n.valves.includes(i) ? '<i class="on"></i>' : '<i></i>')).join('') + '</span>';
+    n.el = el; n.tail = el.firstChild;
+    laneTrack.appendChild(el);
+  }
+  game.bars = [];
+  for (let b = 0; b <= game.beats; b += 4) {
+    const el = document.createElement('div');
+    el.className = 'gbar'; el.style.display = 'none';
+    laneTrack.appendChild(el);
+    game.bars.push({ t: b * game.spb, el });
+  }
+  laneMetrics();
+}
+function startSong(song) {
+  closeSheets();
+  ensureAudio();
+  stopSong();
+  if (editing) setEditing(false);
+  releaseAll();
+  Object.assign(game, {
+    song, diff: settings.gameDiff, speed: settings.gameSpeed, cur: 0, judgeFrom: 0, viewFrom: 0, blow: false, onsets: [],
+    perfect: 0, good: 0, miss: 0, combo: 0, maxCombo: 0, score: 0
+  });
+  game.spb = 60 / (song.bpm * game.speed);
+  game.beats = song.beats;
+  game.notes = song.notes.map((n) => {
+    const f = fingeringFor(n.w);
+    return { w: n.w, ts: n.b * game.spb, te: (n.b + n.d) * game.spb, dur: n.d * game.spb, p: f.p, valves: OFFSET_VALVES[f.off], samples: 0, hits: 0, judged: null, shown: false, el: null, tail: null };
+  });
+  game.end = song.beats * game.spb + 0.8;
+  buildLane();
+  $('#hudTitle').textContent = song.title;
+  $('#laneHud').hidden = false; $('#laneIdle').hidden = true;
+  updateHud();
+  game.t0 = ctx.currentTime + 0.3 + 4 * game.spb;          // one bar of count-in
+  game.nextClick = -4;
+  game.playing = true;
+  if (game.diff === 'easy') ctl.partial = game.notes[0].p;
+  update();
+  game.raf = requestAnimationFrame(gameTick);
+}
+function stopSong() {
+  if (!game.playing) return;
+  game.playing = false; game.blow = false;
+  cancelAnimationFrame(game.raf);
+  setTargetZone(-1);
+  laneTrack.querySelectorAll('.gnote, .gbar').forEach((el) => el.remove());
+  game.notes = []; game.bars = [];
+  showLaneIdle();
+  update();
+}
+function scheduleClicks() {
+  const horizon = ctx.currentTime + 0.2;
+  while (game.nextClick < game.beats) {
+    const k = game.nextClick, t = game.t0 + k * game.spb;
+    if (t > horizon) break;
+    if (t >= ctx.currentTime - 0.02 && (k < 0 || settings.gameClick)) horn.click(t, k % 4 === 0, k < 0 ? 1 : 0.5);
+    game.nextClick++;
+  }
+}
+const noteCorrect = (m) => writtenMidi() === m.w && (game.diff === 'easy' || ctl.soundingNow);
+function judgeNote(m, i) {
+  if (!m.samples) { m.samples = 1; m.hits = noteCorrect(m) ? 1 : 0; }
+  const r = m.hits / m.samples;
+  let j = r >= 0.8 ? 'perfect' : r >= 0.45 ? 'good' : 'miss';
+  if (j === 'perfect' && game.diff !== 'easy' && i > 0) {       // repeated note needs a fresh attack
+    const prev = game.notes[i - 1];
+    if (prev.w === m.w && prev.te >= m.ts - 0.01 && !game.onsets.some((t) => Math.abs(t - m.ts) < 0.25)) j = 'good';
+  }
+  m.judged = j;
+  game[j]++;
+  if (j === 'miss') game.combo = 0;
+  else { game.combo++; game.score += (j === 'perfect' ? 100 : 50) + Math.min(game.combo, 50) * 2; }
+  game.maxCombo = Math.max(game.maxCombo, game.combo);
+  m.el.classList.add(j);
+  const pop = $('#judge');
+  pop.textContent = JUDGE_TEXT[j];
+  pop.className = 'judge ' + j;
+  void pop.offsetWidth;                                         // restart the animation
+  pop.classList.add('show');
+  updateHud();
+}
+function updateHud() {
+  $('#hudScore').textContent = game.score;
+  $('#hudCombo').textContent = game.combo >= 2 ? '連擊 ' + game.combo : '';
+}
+function gameTick() {
+  if (!game.playing) return;
+  const now = ctx.currentTime - game.t0, N = game.notes;
+  scheduleClicks();
+  while (game.cur < N.length && now >= N[game.cur].te) game.cur++;
+  const n = N[game.cur];
+  if (game.diff === 'easy') {
+    if (n) ctl.partial = n.p;
+    game.blow = !!n && now >= n.ts && now < n.te - Math.min(0.05, n.dur * 0.15);   // short gap = re-attack
+    update();
+  } else {
+    setTargetZone(n && n.ts - now < 1.5 ? n.p : -1);
+  }
+  for (let i = game.judgeFrom; i < N.length; i++) {
+    const m = N[i];
+    const a = m.ts + Math.min(0.1, m.dur * 0.25), b = m.te - Math.min(0.08, m.dur * 0.2);
+    if (now < a) break;
+    if (now <= b) { m.samples++; if (noteCorrect(m)) m.hits++; }
+    else if (!m.judged) judgeNote(m, i);
+  }
+  while (game.judgeFrom < N.length && N[game.judgeFrom].judged) game.judgeFrom++;
+  drawLane(now);
+  if (now > game.end) { finishSong(); return; }
+  game.raf = requestAnimationFrame(gameTick);
+}
+function drawLane(now) {
+  const W = laneTrack.clientWidth, pps = game.pps, half = game.col / 2, N = game.notes;
+  for (let i = game.viewFrom; i < N.length; i++) {
+    const m = N[i], x = game.hitX + (m.ts - now) * pps - half;
+    if (x > W + 10) break;
+    if (x + half + m.dur * pps < -half) {
+      if (m.shown) { m.el.classList.add('off'); m.shown = false; }
+      if (i === game.viewFrom) game.viewFrom++;
+      continue;
+    }
+    if (!m.shown) { m.el.classList.remove('off'); m.shown = true; }
+    m.el.style.transform = 'translate3d(' + x.toFixed(1) + 'px,0,0)';
+    m.el.classList.toggle('now', now >= m.ts && now < m.te);
+  }
+  for (const b of game.bars) {
+    const x = game.hitX + (b.t - now) * pps, vis = x > -2 && x < W + 2;
+    b.el.style.display = vis ? '' : 'none';
+    if (vis) b.el.style.transform = 'translateX(' + x.toFixed(1) + 'px)';
+  }
+  const ci = $('#countIn');
+  if (now < 0) { ci.hidden = false; ci.textContent = now < -4 * game.spb ? '' : String(clamp(Math.floor(now / game.spb) + 5, 1, 4)); }
+  else if (!ci.hidden) ci.hidden = true;
+  $('#hudProg').style.width = (clamp(now / (game.beats * game.spb), 0, 1) * 100).toFixed(1) + '%';
+}
+function finishSong() {
+  const song = game.song, total = game.notes.length;
+  const acc = Math.round(((game.perfect + 0.5 * game.good) / total) * 100);
+  const stars = acc >= 90 ? 3 : acc >= 70 ? 2 : acc >= 40 ? 1 : 0;
+  const key = bestKey(song.id, game.diff, game.speed), prev = bests[key];
+  const isNew = !prev || game.score > prev.score;
+  if (isNew) { bests[key] = { score: game.score, acc, stars }; store.set('best', bests); }
+  $('#resultTitle').textContent = song.title;
+  $('#resultSub').textContent = (game.diff === 'easy' ? '簡單' : '標準') + ' · ' + (game.speed === 1 ? '原速' : '慢速');
+  $('#resultAcc').textContent = acc + '%';
+  $('#resultStars').textContent = starText(stars);
+  $('#resultNew').hidden = !(isNew && game.score > 0);
+  $('#rPerfect').textContent = game.perfect;
+  $('#rGood').textContent = game.good;
+  $('#rMiss').textContent = game.miss;
+  $('#rCombo').textContent = game.maxCombo;
+  $('#rScore').textContent = game.score;
+  stopSong();
+  $('#resultWrap').hidden = false;
+}
+
+document.querySelectorAll('input[name="gameDiff"], input[name="gameSpeed"], input[name="gameClick"]').forEach((r) => r.addEventListener('change', () => {
+  settings[r.name] = r.name === 'gameSpeed' ? Number(r.value) : r.name === 'gameClick' ? r.value === 'on' : r.value;
+  saveSettings(); buildSongList();
+}));
+$('#btnGame').addEventListener('click', () => setGameMode(!game.mode));
+$('#btnPickSong').addEventListener('click', openSongs);
+$('#btnLeaveGame').addEventListener('click', () => setGameMode(false));
+$('#btnGameStop').addEventListener('click', stopSong);
+$('#btnCloseSongs').addEventListener('click', closeSheets);
+$('#btnRetry').addEventListener('click', () => startSong(game.song));
+$('#btnOtherSong').addEventListener('click', openSongs);
+$('#btnResultLeave').addEventListener('click', () => setGameMode(false));
+if (window.ResizeObserver) new ResizeObserver(() => { if (game.playing) laneMetrics(); }).observe(laneTrack);
 
 /* ================= misc ================= */
 let toastTimer = 0;
@@ -1167,7 +1637,7 @@ try {
   if ('serviceWorker' in navigator && location.protocol === 'https:') navigator.serviceWorker.register('sw.js').catch(() => {});
 } catch (e) { /* not available here */ }
 
-window.PocketTrumpet = { Horn, PARTIALS, fingeringFor, freqOf };
+window.PocketTrumpet = { Horn, PARTIALS, fingeringFor, freqOf, SONGS, game, songTime: () => (ctx ? ctx.currentTime - game.t0 : 0) };
 })();
 </script>
 <!-- page:body-end -->
